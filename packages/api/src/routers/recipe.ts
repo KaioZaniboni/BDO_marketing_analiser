@@ -8,6 +8,13 @@ import {
 } from '../services/calculator';
 import { getMultipleItemPrices } from '../services/market';
 import { IMPERIAL_TIERS, getImperialBonus, IMPERIAL_RECIPES_MAPPING } from '../services/imperial-data';
+import {
+    compareRecipesByTypeNameId,
+    filterRecipesByTypes,
+    getRecipeVariantKey,
+    normalizeRecipeType,
+    type SupportedRecipeType,
+} from '../services/recipe-classification';
 import type { RankingWeights } from '../types';
 
 const taxConfigSchema = z.object({
@@ -40,7 +47,6 @@ export const recipeRouter = router({
         }))
         .query(async ({ ctx, input }) => {
             const where: Record<string, unknown> = {};
-            if (input.type) where.type = input.type;
             if (input.search) {
                 where.name = { contains: input.search, mode: 'insensitive' };
             }
@@ -63,17 +69,22 @@ export const recipeRouter = router({
                 orderBy: { name: 'asc' },
             });
 
-            // Agrupa por nome para remover duplicatas
+            const filteredRecipes = filterRecipesByTypes(
+                rawRecipes,
+                input.type ? [input.type as SupportedRecipeType] : undefined,
+            );
+
             const uniqueMap = new Map();
-            for (const r of rawRecipes) {
-                if (!uniqueMap.has(r.name)) {
-                    uniqueMap.set(r.name, r);
+            for (const recipe of filteredRecipes) {
+                const key = getRecipeVariantKey(recipe);
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, recipe);
                 }
             }
 
-            const uniqueList = Array.from(uniqueMap.values());
+            const uniqueList = Array.from(uniqueMap.values()).sort(compareRecipesByTypeNameId);
 
-            // Aplica paginação em memória apó agrupar (já que estamos bypassando o Prisma distinct)
+            // Aplica pagina????o em mem??ria ap?? agrupar (j?? que estamos bypassando o Prisma distinct)
             return uniqueList.slice(input.offset, input.offset + input.limit);
         }),
 
@@ -84,13 +95,7 @@ export const recipeRouter = router({
             historyDays: z.number().int().min(1).max(60).default(28),
         }))
         .query(async ({ ctx, input }) => {
-            const where: Record<string, unknown> = {};
-            if (input.types?.length) {
-                where.type = { in: input.types };
-            }
-
-            return ctx.prisma.recipe.findMany({
-                where,
+            const rawRecipes = await ctx.prisma.recipe.findMany({
                 include: {
                     resultItem: {
                         include: {
@@ -119,6 +124,8 @@ export const recipeRouter = router({
                     { id: 'asc' },
                 ],
             });
+
+            return filterRecipesByTypes(rawRecipes, input.types).sort(compareRecipesByTypeNameId);
         }),
 
     /** Detalhes de uma receita por ID */
@@ -147,9 +154,11 @@ export const recipeRouter = router({
 
             if (!recipe) return null;
 
+            const normalizedRecipe = normalizeRecipeType(recipe);
+
             // Busca todas as variantes com o mesmo nome e tipo para encontrar ingredientes alternativos
-            const variants = await ctx.prisma.recipe.findMany({
-                where: { name: recipe.name, type: recipe.type, resultItemId: recipe.resultItemId },
+            const rawVariants = await ctx.prisma.recipe.findMany({
+                where: { name: recipe.name, resultItemId: recipe.resultItemId },
                 include: {
                     ingredients: {
                         include: {
@@ -161,15 +170,17 @@ export const recipeRouter = router({
                     },
                 },
             });
+            const variants = filterRecipesByTypes(rawVariants, [normalizedRecipe.type as SupportedRecipeType]);
 
-            // Busca todas as sub-receitas referentes a todos os possíveis ingredientes
+            // Busca todas as sub-receitas referentes a todos os poss??veis ingredientes
             const allIngItemIds = new Set<number>();
             variants.forEach(v => v.ingredients.forEach(i => allIngItemIds.add(i.itemId)));
 
-            const subRecipes = await ctx.prisma.recipe.findMany({
+            const rawSubRecipes = await ctx.prisma.recipe.findMany({
                 where: { resultItemId: { in: Array.from(allIngItemIds) } },
                 select: { id: true, resultItemId: true, type: true },
             });
+            const subRecipes = filterRecipesByTypes(rawSubRecipes);
             const subRecipeMap = new Map<number, { id: number, type: string }>();
             subRecipes.forEach((sr: any) => { if (!subRecipeMap.has(sr.resultItemId)) subRecipeMap.set(sr.resultItemId, { id: sr.id, type: sr.type }); });
 
@@ -217,7 +228,7 @@ export const recipeRouter = router({
                 });
             });
 
-            return { ...recipe, ingredientAlternatives };
+            return { ...normalizedRecipe, ingredientAlternatives };
         }),
 
     /** Retorna as caixas imperiais suportadas com cálculo otimizado (BDOLytics Clone) */
@@ -229,7 +240,6 @@ export const recipeRouter = router({
             const rawRecipes = await ctx.prisma.recipe.findMany({
                 where: {
                     resultItemId: { in: validIds },
-                    type: input.type
                 },
                 include: {
                     resultItem: { include: { prices: { where: { enhancementLevel: 0 }, take: 1 } } },
@@ -240,10 +250,14 @@ export const recipeRouter = router({
                     }
                 }
             });
+            const recipes = filterRecipesByTypes(
+                rawRecipes,
+                input.type ? [input.type as SupportedRecipeType] : undefined,
+            );
 
             // Agrupa variante de menor custo
             const uniqueMap = new Map();
-            for (const r of rawRecipes) {
+            for (const r of recipes) {
                 const cost = r.ingredients.reduce((acc: number, ing: any) => {
                     const ingPrice = Number(ing.item?.prices?.[0]?.lastSoldPrice ?? ing.item?.prices?.[0]?.basePrice ?? 0);
                     return acc + (ing.quantity * ingPrice);
@@ -384,11 +398,7 @@ export const recipeRouter = router({
             limit: z.number().int().min(1).max(100).default(50),
         }))
         .query(async ({ ctx, input }) => {
-            const where: Record<string, unknown> = {};
-            if (input.type) where.type = input.type;
-
             const rawRecipes = await ctx.prisma.recipe.findMany({
-                where,
                 include: {
                     resultItem: {
                         include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
@@ -397,13 +407,21 @@ export const recipeRouter = router({
                 },
             });
 
+            const filteredRecipes = filterRecipesByTypes(
+                rawRecipes,
+                input.type ? [input.type as SupportedRecipeType] : undefined,
+            );
+
             const uniqueMap = new Map();
-            for (const r of rawRecipes) {
-                if (!uniqueMap.has(r.name)) {
-                    uniqueMap.set(r.name, r);
+            for (const recipe of filteredRecipes) {
+                const key = getRecipeVariantKey(recipe);
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, recipe);
                 }
             }
-            const recipes = Array.from(uniqueMap.values()).slice(0, input.limit);
+            const recipes = Array.from(uniqueMap.values())
+                .sort(compareRecipesByTypeNameId)
+                .slice(0, input.limit);
 
             // Buscar preços de mercado para todos os itens resultado
             const resultItemIds = recipes.map((r: { resultItemId: number }) => r.resultItemId);

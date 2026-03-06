@@ -17,6 +17,7 @@ import {
     Settings2,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
+import { resolveBdoIconUrl } from '@/lib/icon-url';
 import {
     buildOverviewRows,
     mapGlobalSettingsToCraftingSettings,
@@ -401,26 +402,29 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                                     </td>
                                 </tr>
                             ) : (
-                                paginatedRows.map((row) => (
-                                    <tr
-                                        key={row.id}
-                                        className="border-t border-border hover:bg-bg-hover/40 transition-colors cursor-pointer"
-                                        onClick={() => router.push(`/${type}/${row.id}`)}
-                                    >
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-3">
-                                                {row.recipe.resultItem.iconUrl ? (
-                                                    // eslint-disable-next-line @next/next/no-img-element
-                                                    <img
-                                                        src={row.recipe.resultItem.iconUrl}
-                                                        alt={row.name}
-                                                        className="h-10 w-10 rounded-lg border border-border bg-bg-primary object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-bg-primary">
-                                                        <Icon size={16} className={getPrimaryAccent(type)} />
-                                                    </div>
-                                                )}
+                                paginatedRows.map((row) => {
+                                    const resultIconUrl = resolveBdoIconUrl(row.recipe.resultItem.iconUrl);
+
+                                    return (
+                                        <tr
+                                            key={row.id}
+                                            className="border-t border-border hover:bg-bg-hover/40 transition-colors cursor-pointer"
+                                            onClick={() => router.push(`/${type}/${row.id}`)}
+                                        >
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    {resultIconUrl ? (
+                                                        // eslint-disable-next-line @next/next/no-img-element
+                                                        <img
+                                                            src={resultIconUrl}
+                                                            alt={row.name}
+                                                            className="h-10 w-10 rounded-lg border border-border bg-bg-primary object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-bg-primary">
+                                                            <Icon size={16} className={getPrimaryAccent(type)} />
+                                                        </div>
+                                                    )}
                                                 <div className="min-w-0">
                                                     <Link
                                                         href={`/${type}/${row.id}`}
@@ -483,8 +487,9 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                                                 {formatNumber(row.experience)}
                                             </Link>
                                         </td>
-                                    </tr>
-                                ))
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

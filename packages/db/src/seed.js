@@ -5,6 +5,7 @@ const path = require('path');
 const itemsPath = path.join(__dirname, 'seed-data', 'items.json');
 const recipesPath = path.join(__dirname, 'seed-data', 'recipes.json');
 const marketPricesPath = path.join(__dirname, 'seed-data', 'market_prices.json');
+const canonicalRecipesPath = path.join(__dirname, '..', 'bdo_recipes.json');
 
 const items = fs.existsSync(itemsPath) ? require('./seed-data/items.json') : [];
 const recipes = fs.existsSync(recipesPath) ? require('./seed-data/recipes.json') : [];
@@ -12,13 +13,51 @@ const marketPrices = fs.existsSync(marketPricesPath) ? require('./seed-data/mark
 
 const prisma = new PrismaClient();
 
-async function main() {
-    console.log(`Inciando seed do banco de dados...`);
+function loadCanonicalRecipeTypes() {
+    const typeMap = new Map();
+    if (!fs.existsSync(canonicalRecipesPath)) {
+        return typeMap;
+    }
 
-    // 1. Seed de Itens
+    const canonicalRecipes = JSON.parse(fs.readFileSync(canonicalRecipesPath, 'utf8'));
+    for (const recipe of canonicalRecipes) {
+        if (['cooking', 'alchemy', 'processing'].includes(recipe.main_category)) {
+            typeMap.set(recipe.id, recipe.main_category);
+        }
+    }
+
+    return typeMap;
+}
+
+function normalizeRecipesForSeed(inputRecipes) {
+    const canonicalTypes = loadCanonicalRecipeTypes();
+    const uniqueRecipes = new Map();
+
+    for (const recipe of inputRecipes) {
+        if (!recipe?.id || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0 || !recipe.resultItemId) {
+            continue;
+        }
+
+        const normalizedRecipe = {
+            ...recipe,
+            type: canonicalTypes.get(recipe.id) || recipe.type,
+        };
+
+        uniqueRecipes.set(recipe.id, normalizedRecipe);
+    }
+
+    return Array.from(uniqueRecipes.values()).sort((left, right) => (
+        left.type.localeCompare(right.type)
+        || left.name.localeCompare(right.name)
+        || left.id - right.id
+    ));
+}
+
+async function main() {
+    console.log('Inciando seed do banco de dados...');
+
     if (items.length > 0) {
         console.log(`Temos ${items.length} itens para fazer seed... aguarde (pode demorar).`);
-        // Using createMany for massive speedup if possible, but upsert is safe
         let count = 0;
         for (const item of items) {
             await prisma.item.upsert({
@@ -40,12 +79,11 @@ async function main() {
             count++;
             if (count % 1000 === 0) console.log(`  ...${count} itens inseridos`);
         }
-        console.log(`✅ Seed de Itens concluído!`);
+        console.log('Seed de Itens concluido!');
     }
 
-    // 2. Seed de Preços de Mercado
     if (marketPrices.length > 0) {
-        console.log(`Temos ${marketPrices.length} preços de mercado para atualizar...`);
+        console.log(`Temos ${marketPrices.length} precos de mercado para atualizar...`);
         let countP = 0;
         for (const p of marketPrices) {
             try {
@@ -53,15 +91,15 @@ async function main() {
                     where: {
                         itemId_enhancementLevel: {
                             itemId: p.item_id,
-                            enhancementLevel: p.enhancement_level
-                        }
+                            enhancementLevel: p.enhancement_level,
+                        },
                     },
                     update: {
                         basePrice: p.price,
                         lastSoldPrice: p.price,
                         currentStock: p.in_stock,
                         totalTrades: p.total_trades,
-                        recordedAt: new Date()
+                        recordedAt: new Date(),
                     },
                     create: {
                         itemId: p.item_id,
@@ -70,8 +108,8 @@ async function main() {
                         lastSoldPrice: p.price,
                         currentStock: p.in_stock,
                         totalTrades: p.total_trades,
-                        recordedAt: new Date()
-                    }
+                        recordedAt: new Date(),
+                    },
                 });
 
                 const today = new Date();
@@ -83,7 +121,7 @@ async function main() {
                             itemId: p.item_id,
                             enhancementLevel: p.enhancement_level,
                             recordedDate: today,
-                        }
+                        },
                     },
                     update: {
                         price: p.price,
@@ -95,22 +133,22 @@ async function main() {
                         recordedDate: today,
                         price: p.price,
                         volume: p.total_trades,
-                    }
+                    },
                 });
                 countP++;
             } catch (e) {
                 // Ignore items that failed foreign key
             }
-            if (countP > 0 && countP % 2000 === 0) console.log(`  ...${countP} preços inseridos`);
+            if (countP > 0 && countP % 2000 === 0) console.log(`  ...${countP} precos inseridos`);
         }
-        console.log(`✅ Seed de Preços da API concluído!`);
+        console.log('Seed de Precos da API concluido!');
     }
 
-    // 3. Seed de Receitas
-    if (recipes.length > 0) {
-        console.log(`Temos ${recipes.length} receitas para fazer seed...`);
+    const normalizedRecipes = normalizeRecipesForSeed(recipes);
+    if (normalizedRecipes.length > 0) {
+        console.log(`Temos ${normalizedRecipes.length} receitas para fazer seed...`);
         let rCount = 0;
-        for (const recipe of recipes) {
+        for (const recipe of normalizedRecipes) {
             try {
                 const upsertedRecipe = await prisma.recipe.upsert({
                     where: { id: recipe.id },
@@ -134,11 +172,11 @@ async function main() {
                         procQuantity: recipe.procQuantity ? parseFloat(recipe.procQuantity) : null,
                         experience: recipe.experience || 400,
                         cookTimeSeconds: recipe.cookTimeSeconds || 1.0,
-                    }
+                    },
                 });
 
                 await prisma.recipeIngredient.deleteMany({
-                    where: { recipeId: upsertedRecipe.id }
+                    where: { recipeId: upsertedRecipe.id },
                 });
 
                 for (let i = 0; i < recipe.ingredients.length; i++) {
@@ -148,16 +186,16 @@ async function main() {
                             recipeId: upsertedRecipe.id,
                             itemId: ing.itemId,
                             quantity: ing.quantity,
-                            sortOrder: i
-                        }
+                            sortOrder: i,
+                        },
                     });
                 }
                 rCount++;
             } catch (e) {
-                console.error(`Falha na receita ${recipe.id}: ` + e.message);
+                console.error(`Falha na receita ${recipe.id}: ${e.message}`);
             }
         }
-        console.log(`✅ Seed de ${rCount} Receitas concluído!`);
+        console.log(`Seed de ${rCount} Receitas concluido!`);
     }
 }
 

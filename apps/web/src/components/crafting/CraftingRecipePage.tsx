@@ -29,6 +29,7 @@ import {
     YAxis,
 } from 'recharts';
 import { trpc } from '@/lib/trpc';
+import { resolveBdoIconUrl } from '@/lib/icon-url';
 import {
     buildRecipeTree,
     flattenLeafInputsWithLookup,
@@ -413,16 +414,19 @@ function InputTable({
                     </tr>
                 </thead>
                 <tbody>
-                    {inputs.map((input) => (
-                        <tr key={input.itemId} className="border-t border-border">
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-3">
-                                    {input.iconUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={input.iconUrl} alt={input.name} className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
-                                    ) : (
-                                        <div className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
-                                    )}
+                    {inputs.map((input) => {
+                        const inputIconUrl = resolveBdoIconUrl(input.iconUrl);
+
+                        return (
+                            <tr key={input.itemId} className="border-t border-border">
+                                <td className="px-4 py-3">
+                                    <div className="flex items-center gap-3">
+                                        {inputIconUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={inputIconUrl} alt={input.name} className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
+                                        ) : (
+                                            <div className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
+                                        )}
                                     <div>
                                         <p className="font-medium text-primary">{input.name}</p>
                                         <p className="text-xs text-secondary">Peso {input.weightPerUnit.toFixed(2)} LT</p>
@@ -449,8 +453,9 @@ function InputTable({
                             <td className="px-4 py-3 text-right font-mono text-loss">
                                 {input.totalCost.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                             </td>
-                        </tr>
-                    ))}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
@@ -539,6 +544,7 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
 
     const Icon = recipe.type === 'alchemy' ? FlaskConical : ChefHat;
     const resultPrice = getItemPriceBreakdown(recipe.resultItem, calculatorStore).unitPrice;
+    const resultIconUrl = resolveBdoIconUrl(recipe.resultItem.iconUrl);
 
     return (
         <div className="flex flex-col gap-6 pb-24">
@@ -553,10 +559,10 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
                     </button>
 
                     <div className="flex items-center gap-4">
-                        {recipe.resultItem.iconUrl ? (
+                        {resultIconUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                                src={recipe.resultItem.iconUrl}
+                                src={resultIconUrl}
                                 alt={recipe.name}
                                 className="h-14 w-14 rounded-2xl border border-border bg-bg-primary"
                             />
