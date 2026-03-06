@@ -1,0 +1,186 @@
+// Prisma Schema — BDO Market Analyzer
+// Fonte de dados: PostgreSQL
+// Schema modelando items, preços, receitas, inventário e usuários
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// Items do jogo
+// ========================================
+model Item {
+  id            Int      @id // ID do item no BDO (não auto-increment)
+  name          String   @db.VarChar(255)
+  categoryId    Int?     @map("category_id")
+  subCategoryId Int?     @map("sub_category_id")
+  weight        Int      @default(0) // Peso em LT (x100 para evitar decimais)
+  grade         Int      @default(0) @db.SmallInt // 0=Branco, 1=Verde, 2=Azul, 3=Amarelo, 4=Laranja
+  isTradeable   Boolean  @default(true) @map("is_tradeable")
+  iconUrl       String?  @map("icon_url") @db.VarChar(512)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  prices           ItemPrice[]
+  priceHistory     PriceHistory[]
+  recipeIngredients RecipeIngredient[]
+  recipesProduced  Recipe[]          @relation("RecipeResult")
+  recipesProc      Recipe[]          @relation("RecipeProc")
+  inventoryEntries UserInventory[]
+
+  @@map("items")
+}
+
+// ========================================
+// Preços atuais dos items (snapshot mais recente)
+// ========================================
+model ItemPrice {
+  id              Int      @id @default(autoincrement())
+  itemId          Int      @map("item_id")
+  enhancementLevel Int     @default(0) @map("enhancement_level") @db.SmallInt
+  basePrice       BigInt   @map("base_price")
+  lastSoldPrice   BigInt?  @map("last_sold_price")
+  priceMin        BigInt?  @map("price_min")
+  priceMax        BigInt?  @map("price_max")
+  currentStock    Int      @default(0) @map("current_stock")
+  totalTrades     BigInt   @default(0) @map("total_trades")
+  recordedAt      DateTime @default(now()) @map("recorded_at")
+
+  item Item @relation(fields: [itemId], references: [id])
+
+  @@unique([itemId, enhancementLevel])
+  @@index([itemId])
+  @@map("item_prices")
+}
+
+// ========================================
+// Histórico de preços (uma entrada por dia)
+// ========================================
+model PriceHistory {
+  id              Int      @id @default(autoincrement())
+  itemId          Int      @map("item_id")
+  enhancementLevel Int     @default(0) @map("enhancement_level") @db.SmallInt
+  price           BigInt
+  volume          Int      @default(0)
+  recordedDate    DateTime @map("recorded_date") @db.Date
+
+  item Item @relation(fields: [itemId], references: [id])
+
+  @@unique([itemId, enhancementLevel, recordedDate])
+  @@index([itemId, recordedDate])
+  @@map("price_history")
+}
+
+// ========================================
+// Receitas (cooking, alchemy, processing)
+// ========================================
+model Recipe {
+  id              Int    @id @default(autoincrement())
+  name            String @db.VarChar(255)
+  type            String @db.VarChar(20) // cooking | alchemy | processing
+  resultItemId    Int    @map("result_item_id")
+  resultQuantity  Float  @default(1.0) @map("result_quantity")
+  procItemId      Int?   @map("proc_item_id")
+  procQuantity    Float? @map("proc_quantity")
+  masteryBonusPct Int    @default(0) @map("mastery_bonus_pct")
+  experience      Int    @default(0)
+  cookTimeSeconds Float  @default(1.0) @map("cook_time_seconds")
+  categoryId      Int?   @map("category_id")
+
+  resultItem    Item               @relation("RecipeResult", fields: [resultItemId], references: [id])
+  procItem      Item?              @relation("RecipeProc", fields: [procItemId], references: [id])
+  ingredients   RecipeIngredient[]
+  imperialBoxes ImperialBox[]
+
+  @@map("recipes")
+}
+
+// ========================================
+// Ingredientes de receitas
+// ========================================
+model RecipeIngredient {
+  id        Int @id @default(autoincrement())
+  recipeId  Int @map("recipe_id")
+  itemId    Int @map("item_id")
+  quantity  Int
+  sortOrder Int @default(0) @map("sort_order")
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  item   Item   @relation(fields: [itemId], references: [id])
+
+  @@index([recipeId])
+  @@map("recipe_ingredients")
+}
+
+// ========================================
+// Usuários
+// ========================================
+model User {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique @db.VarChar(100)
+  email          String   @unique @db.VarChar(255)
+  passwordHash   String   @map("password_hash") @db.VarChar(255)
+  familyFame     Int      @default(0) @map("family_fame")
+  hasValuePack   Boolean  @default(false) @map("has_value_pack")
+  hasMerchRing   Boolean  @default(false) @map("has_merch_ring")
+  cookingMastery Int      @default(0) @map("cooking_mastery")
+  alchemyMastery Int      @default(0) @map("alchemy_mastery")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  inventory UserInventory[]
+
+  @@map("users")
+}
+
+// ========================================
+// Inventário do usuário
+// ========================================
+model UserInventory {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @map("user_id")
+  itemId             Int      @map("item_id")
+  quantity           Int      @default(0)
+  avgAcquisitionCost BigInt?  @map("avg_acquisition_cost")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id])
+
+  @@unique([userId, itemId])
+  @@index([userId])
+  @@map("user_inventory")
+}
+
+// ========================================
+// Caixas de Entrega Imperial
+// ========================================
+model ImperialBox {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(255)
+  tier           String   @db.VarChar(50) // guru, master, artisan, professional, etc
+  type           String   @db.VarChar(50) // cooking, alchemy
+  recipeId       Int      @map("recipe_id")
+  recipe         Recipe   @relation(fields: [recipeId], references: [id])
+  basePrice      BigInt   @map("base_price")
+  itemsRequired  Int      @default(1) @map("items_required")
+
+  @@map("imperial_boxes")
+}
+
+// ========================================
+// Categorias de Receita
+// ========================================
+model RecipeCategory {
+  id       Int      @id @default(autoincrement())
+  name     String   @db.VarChar(100)
+  type     String   @db.VarChar(50)   // cooking, alchemy, processing
+  // Relacionamento com Recipe via categoryId
+  // (Pode adicionar se precisar: recipes Recipe[])
+
+  @@map("recipe_categories")
+}

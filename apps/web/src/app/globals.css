@@ -1,0 +1,280 @@
+@import "tailwindcss";
+
+/* ==========================================
+   BDO Market Analyzer — Design System
+   Tema: Dark mode inspirado no Black Desert Online
+   Paleta: Azul-escuro + dourado + acentos verde/vermelho
+   ========================================== */
+
+@theme {
+  /* Cores principais */
+  --color-bg-primary: #0a0e1a;
+  --color-bg-secondary: #111827;
+  --color-bg-card: #1a2035;
+  --color-bg-hover: #222b45;
+  --color-bg-active: #2a3555;
+
+  /* Bordas */
+  --color-border: #2a3555;
+  --color-border-hover: #3b4a6b;
+
+  /* Texto */
+  --color-text-primary: #e8ecf4;
+  --color-text-secondary: #8892a8;
+  --color-text-muted: #5a6480;
+
+  /* Accent — Dourado BDO */
+  --color-gold: #d4a843;
+  --color-gold-light: #f0d078;
+  --color-gold-dark: #a07830;
+
+  /* Lucro vs Prejuízo */
+  --color-profit: #10b981;
+  --color-profit-bg: #10b98115;
+  --color-loss: #ef4444;
+  --color-loss-bg: #ef444415;
+
+  /* Info / Neutro */
+  --color-info: #3b82f6;
+  --color-info-bg: #3b82f615;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #f59e0b15;
+
+  /* Graus de raridade BDO */
+  --color-grade-white: #c8ccd4;
+  --color-grade-green: #22c55e;
+  --color-grade-blue: #3b82f6;
+  --color-grade-yellow: #eab308;
+  --color-grade-orange: #f97316;
+
+  /* Sombras */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow-gold: 0 0 20px rgba(212, 168, 67, 0.15);
+
+  /* Fontes */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Reset base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* Utilitários de texto */
+.text-silver {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.text-profit {
+  color: var(--color-profit);
+}
+
+.text-loss {
+  color: var(--color-loss);
+}
+
+.text-gold {
+  color: var(--color-gold);
+}
+
+/* Card base */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--color-border-hover);
+}
+
+.card-gold {
+  border-color: var(--color-gold-dark);
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* Badge de raridade */
+.grade-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.grade-white { color: var(--color-grade-white); background: rgba(200,204,212,0.1); }
+.grade-green { color: var(--color-grade-green); background: rgba(34,197,94,0.1); }
+.grade-blue { color: var(--color-grade-blue); background: rgba(59,130,246,0.1); }
+.grade-yellow { color: var(--color-grade-yellow); background: rgba(234,179,8,0.1); }
+.grade-orange { color: var(--color-grade-orange); background: rgba(249,115,22,0.1); }
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-card) 25%,
+    var(--color-bg-hover) 50%,
+    var(--color-bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* KPI Card */
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1.2;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Trend indicator */
+.trend-up {
+  color: var(--color-profit);
+}
+
+.trend-down {
+  color: var(--color-loss);
+}
+
+.trend-neutral {
+  color: var(--color-text-muted);
+}
+
+/* Coverage bar */
+.coverage-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-hover);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.coverage-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  margin: 2px 8px;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+}
+
+.sidebar-link:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-hover);
+}
+
+.sidebar-link.active {
+  color: var(--color-gold);
+  background: var(--color-bg-active);
+}
+
+/* Main content */
+.main-content {
+  margin-left: 260px;
+  min-height: 100vh;
+  padding: 24px 32px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 16px;
+  }
+}

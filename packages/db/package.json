@@ -1,0 +1,23 @@
+{
+    "name": "@bdo/db",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "scripts": {
+        "generate": "prisma generate",
+        "migrate": "prisma migrate dev",
+        "migrate:prod": "prisma migrate deploy",
+        "seed": "node src/seed.js",
+        "studio": "prisma studio"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.0.0"
+    },
+    "devDependencies": {
+        "cheerio": "^1.2.0",
+        "prisma": "^6.0.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.4.0"
+    }
+}
