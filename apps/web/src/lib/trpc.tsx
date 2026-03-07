@@ -11,6 +11,7 @@ import type { AppRouter } from '@bdo/api';
  * Client tRPC tipado — infere automaticamente os tipos do AppRouter.
  */
 export const trpc = createTRPCReact<AppRouter>();
+const MARKET_QUERY_REFETCH_INTERVAL_MS = 2 * 60 * 1000;
 
 /**
  * Provider que configura tRPC + TanStack Query para toda a aplicação.
@@ -22,7 +23,10 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
                 defaultOptions: {
                     queries: {
                         staleTime: 60 * 1000, // 1 minuto
-                        refetchOnWindowFocus: false,
+                        refetchInterval: MARKET_QUERY_REFETCH_INTERVAL_MS,
+                        refetchIntervalInBackground: true,
+                        refetchOnReconnect: true,
+                        refetchOnWindowFocus: true,
                     },
                 },
             }),
