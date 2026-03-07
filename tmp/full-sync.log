@@ -1,0 +1,46 @@
+Iniciando job de sync. Buscando itens de interesse...
+Encontrados 9972 itens tradeable.
+Buscando preços atualizados da API...
+Progresso da coleta de mercado: 500/9972
+Progresso da coleta de mercado: 1000/9972
+Progresso da coleta de mercado: 1500/9972
+Progresso da coleta de mercado: 2000/9972
+Progresso da coleta de mercado: 2500/9972
+Progresso da coleta de mercado: 3000/9972
+Progresso da coleta de mercado: 3500/9972
+Progresso da coleta de mercado: 4000/9972
+Progresso da coleta de mercado: 4500/9972
+Progresso da coleta de mercado: 5000/9972
+Progresso da coleta de mercado: 5500/9972
+Progresso da coleta de mercado: 6000/9972
+Progresso da coleta de mercado: 6500/9972
+Progresso da coleta de mercado: 7000/9972
+Progresso da coleta de mercado: 7500/9972
+Progresso da coleta de mercado: 8000/9972
+Progresso da coleta de mercado: 8500/9972
+Progresso da coleta de mercado: 9000/9972
+Progresso da coleta de mercado: 9500/9972
+Progresso da coleta de mercado: 9972/9972
+Recebidas 9972 respostas do mercado. Atualizando DB...
+Progresso da persistência: 500/9972
+Progresso da persistência: 1000/9972
+Progresso da persistência: 1500/9972
+Progresso da persistência: 2000/9972
+Progresso da persistência: 2500/9972
+Progresso da persistência: 3000/9972
+Progresso da persistência: 3500/9972
+Progresso da persistência: 4000/9972
+Progresso da persistência: 4500/9972
+Progresso da persistência: 5000/9972
+Progresso da persistência: 5500/9972
+Progresso da persistência: 6000/9972
+Progresso da persistência: 6500/9972
+Progresso da persistência: 7000/9972
+Progresso da persistência: 7500/9972
+Progresso da persistência: 8000/9972
+Progresso da persistência: 8500/9972
+Progresso da persistência: 9000/9972
+Progresso da persistência: 9500/9972
+Progresso da persistência: 9972/9972
+✅ Sincronização finalizada. 9972 registros afetados.
+DONE

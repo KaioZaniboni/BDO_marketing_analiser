@@ -200,6 +200,7 @@ interface RecipeForRanking {
     recipeName: string;
     recipeType: string;
     resultItemId: number;
+    dailyVolume: number;
     analysis: ProfitAnalysis;
 }
 
@@ -220,8 +221,8 @@ export function rankRecipes(
             ? ((r.analysis.craftProfit - totalCost) / totalCost) * 100
             : 0;
 
-        // Liquidez: volume diário / estoque
-        const dailyVolume = Number(resultItem?.totalTrades ?? 0);
+        // Liquidez: volume diário histórico / estoque atual do snapshot.
+        const dailyVolume = Math.max(0, Number(r.dailyVolume ?? 0));
         const stock = resultItem?.currentStock ?? 1;
         const liquidityRaw = stock > 0 ? dailyVolume / stock : dailyVolume * 2;
 

@@ -562,6 +562,10 @@ export function getVolumeTrend(item: CalculatorItem | null | undefined): number 
     return ((average(recent) - previousAverage) / previousAverage) * 100;
 }
 
+export function getLatestDailyVolume(item: CalculatorItem | null | undefined): number {
+    return toNumber(item?.priceHistory?.[0]?.volume ?? 0);
+}
+
 function buildByproductOutput(
     recipe: CalculatorRecipe,
     craftQuantity: number,
@@ -607,15 +611,31 @@ interface BuildRecipeTreeOptions {
     craftQuantity: number;
     settings: CraftingSettings;
     state: CraftingCalculatorState;
+    context?: BuildContext;
 }
 
-interface BuildContext {
+export interface BuildContext {
     groupedRecipes: Map<string, CalculatorRecipe[]>;
     resultLookup: Map<number, CalculatorRecipe[]>;
     itemLookup: Map<number, CalculatorItem>;
     settings: CraftingSettings;
     state: CraftingCalculatorState;
     saleMultiplier: number;
+}
+
+export function buildRecipeContext(options: {
+    recipes: CalculatorRecipe[];
+    settings: CraftingSettings;
+    state: CraftingCalculatorState;
+}): BuildContext {
+    return {
+        groupedRecipes: groupRecipes(options.recipes),
+        resultLookup: buildResultLookup(options.recipes),
+        itemLookup: buildItemLookup(options.recipes),
+        settings: options.settings,
+        state: options.state,
+        saleMultiplier: getNetSaleMultiplier(options.settings),
+    };
 }
 
 function selectRecipeCandidate(
@@ -804,14 +824,11 @@ export function buildRecipeTree(options: BuildRecipeTreeOptions): RecipeTreeNode
         return null;
     }
 
-    const context: BuildContext = {
-        groupedRecipes: groupRecipes(options.recipes),
-        resultLookup: buildResultLookup(options.recipes),
-        itemLookup: buildItemLookup(options.recipes),
+    const context = options.context ?? buildRecipeContext({
+        recipes: options.recipes,
         settings: options.settings,
         state: options.state,
-        saleMultiplier: getNetSaleMultiplier(options.settings),
-    };
+    });
 
     return buildRecipeNode(rootRecipe, options.craftQuantity, null, context, new Set([rootRecipe.id]));
 }
@@ -857,12 +874,13 @@ export function flattenLeafInputsWithLookup(
     node: RecipeTreeNode,
     recipes: CalculatorRecipe[],
     state: CraftingCalculatorState,
+    itemLookup?: Map<number, CalculatorItem>,
 ): LeafInputRow[] {
-    const itemLookup = buildItemLookup(recipes);
+    const resolvedItemLookup = itemLookup ?? buildItemLookup(recipes);
     const baseRows = flattenLeafInputs(node, state);
 
     return baseRows.map((row) => {
-        const item = itemLookup.get(row.itemId);
+        const item = resolvedItemLookup.get(row.itemId);
         const price = getItemPriceBreakdown(item, state);
         return {
             ...row,
@@ -905,7 +923,13 @@ export function chooseBestVariant(
     allRecipes: CalculatorRecipe[],
     settings: CraftingSettings,
     state: CraftingCalculatorState,
+    context?: BuildContext,
 ): CalculatorRecipe {
+    const recipeContext = context ?? buildRecipeContext({
+        recipes: allRecipes,
+        settings,
+        state,
+    });
     let selected = variants[0];
     let bestSilverPerHour = Number.NEGATIVE_INFINITY;
 
@@ -916,6 +940,7 @@ export function chooseBestVariant(
             craftQuantity: 1000,
             settings,
             state,
+            context: recipeContext,
         });
 
         const score = tree?.profitPerHour ?? Number.NEGATIVE_INFINITY;
@@ -934,18 +959,20 @@ export function buildOverviewRows(
     settings: CraftingSettings,
     state: CraftingCalculatorState,
 ): RecipeOverviewRow[] {
+    const context = buildRecipeContext({ recipes, settings, state });
     const relevantRecipes = recipes.filter((recipe) => recipe.type === type);
     const groups = groupRecipes(relevantRecipes);
     const rows: RecipeOverviewRow[] = [];
 
     for (const variants of groups.values()) {
-        const recipe = chooseBestVariant(variants, recipes, settings, state);
+        const recipe = chooseBestVariant(variants, recipes, settings, state, context);
         const tree = buildRecipeTree({
             recipes,
             rootRecipeId: recipe.id,
             craftQuantity: 1000,
             settings,
             state,
+            context,
         });
 
         rows.push({
@@ -956,7 +983,7 @@ export function buildOverviewRows(
             marketPrice: getItemPriceBreakdown(recipe.resultItem, state).unitPrice,
             silverPerHour: tree?.profitPerHour ?? 0,
             priceChange: getPriceTrend(recipe.resultItem),
-            dailyVolume: toNumber(getMarketSnapshot(recipe.resultItem)?.totalTrades ?? 0),
+            dailyVolume: getLatestDailyVolume(recipe.resultItem),
             volumeChange: getVolumeTrend(recipe.resultItem),
             experience: recipe.experience,
             favorite: state.favoriteIds[type].includes(recipe.id),

@@ -21,9 +21,11 @@ import { resolveBdoIconUrl } from '@/lib/icon-url';
 import {
     buildOverviewRows,
     mapGlobalSettingsToCraftingSettings,
+    type CraftingCalculatorState,
     type CalculatorRecipe,
     type RecipeOverviewRow,
 } from '@/lib/crafting/calculator';
+import { matchesOverviewFilters, type OverviewFiltersState } from '@/lib/crafting/overview-filters';
 import { useCraftingCalculatorStore } from '@/stores/crafting-calculator-store';
 import { useGlobalSettings } from '@/stores/global-settings-store';
 
@@ -35,11 +37,7 @@ interface SortRule {
     direction: SortDirection;
 }
 
-interface OverviewFilters {
-    minSilverPerHour: string;
-    minDailyVolume: string;
-    favoritesOnly: boolean;
-}
+type OverviewFilters = OverviewFiltersState;
 
 interface CraftingMarketPageProps {
     type: PageType;
@@ -101,10 +99,6 @@ function readOverviewState(type: PageType): { searchTerm: string; sorts: SortRul
     }
 }
 
-function getPrimaryIcon(type: PageType) {
-    return type === 'cooking' ? ChefHat : FlaskConical;
-}
-
 function getPrimaryAccent(type: PageType): string {
     return type === 'cooking' ? 'text-gold' : 'text-info';
 }
@@ -159,16 +153,28 @@ function compareRows(left: RecipeOverviewRow, right: RecipeOverviewRow, rule: So
 export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
     const router = useRouter();
     const settings = useGlobalSettings();
-    const store = useCraftingCalculatorStore();
-    const Icon = getPrimaryIcon(type);
+    const customPrices = useCraftingCalculatorStore((state) => state.customPrices);
+    const taxedItemIds = useCraftingCalculatorStore((state) => state.taxedItemIds);
+    const keptItemIds = useCraftingCalculatorStore((state) => state.keptItemIds);
+    const favoriteIds = useCraftingCalculatorStore((state) => state.favoriteIds);
+    const craftQuantities = useCraftingCalculatorStore((state) => state.craftQuantities);
+    const selectedMaterials = useCraftingCalculatorStore((state) => state.selectedMaterials);
+    const useRareProcIds = useCraftingCalculatorStore((state) => state.useRareProcIds);
+    const slowCookedIds = useCraftingCalculatorStore((state) => state.slowCookedIds);
+    const collapsedIds = useCraftingCalculatorStore((state) => state.collapsedIds);
+    const toggleFavorite = useCraftingCalculatorStore((state) => state.toggleFavorite);
     const overviewState = useMemo(() => readOverviewState(type), [type]);
     const [searchTerm, setSearchTerm] = useState(overviewState.searchTerm);
     const [sorts, setSorts] = useState<SortRule[]>(overviewState.sorts);
     const [filters, setFilters] = useState<OverviewFilters>(overviewState.filters);
     const [page, setPage] = useState(0);
     const [showFilters, setShowFilters] = useState(false);
+    const catalogTypes = useMemo<Array<'cooking' | 'alchemy' | 'processing'>>(
+        () => (type === 'alchemy' ? ['alchemy', 'cooking'] : ['cooking']),
+        [type],
+    );
     const { data: recipes, isLoading } = trpc.recipe.catalog.useQuery({
-        types: ['cooking', 'alchemy', 'processing'],
+        types: catalogTypes,
         historyDays: 28,
     });
 
@@ -181,39 +187,35 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
         [settings],
     );
 
+    const calculatorState = useMemo<CraftingCalculatorState>(() => ({
+        customPrices,
+        taxedItemIds,
+        keptItemIds,
+        favoriteIds,
+        craftQuantities,
+        selectedMaterials,
+        useRareProcIds,
+        slowCookedIds,
+        collapsedIds,
+    }), [
+        collapsedIds,
+        craftQuantities,
+        customPrices,
+        favoriteIds,
+        keptItemIds,
+        selectedMaterials,
+        slowCookedIds,
+        taxedItemIds,
+        useRareProcIds,
+    ]);
+
     const rows = useMemo(
-        () => buildOverviewRows((recipes ?? []) as CalculatorRecipe[], type, craftingSettings, store),
-        [craftingSettings, recipes, store, type],
+        () => buildOverviewRows((recipes ?? []) as CalculatorRecipe[], type, craftingSettings, calculatorState),
+        [calculatorState, craftingSettings, recipes, type],
     );
 
     const filteredRows = useMemo(() => {
-        const minSilverPerHour = Number(filters.minSilverPerHour || 0);
-        const minDailyVolume = Number(filters.minDailyVolume || 0);
-        const normalizedSearch = searchTerm.trim().toLowerCase();
-
-        let nextRows = rows.filter((row) => {
-            const matchesSearch = normalizedSearch.length === 0
-                || row.name.toLowerCase().includes(normalizedSearch)
-                || row.possibleInputs.some((input) => input.toLowerCase().includes(normalizedSearch));
-
-            if (!matchesSearch) {
-                return false;
-            }
-
-            if (filters.favoritesOnly && !row.favorite) {
-                return false;
-            }
-
-            if (row.silverPerHour < minSilverPerHour) {
-                return false;
-            }
-
-            if (row.dailyVolume < minDailyVolume) {
-                return false;
-            }
-
-            return true;
-        });
+        let nextRows = rows.filter((row) => matchesOverviewFilters(row, searchTerm, filters));
 
         nextRows = [...nextRows].sort((left, right) => {
             for (const rule of sorts) {
@@ -230,11 +232,8 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
     }, [filters, rows, searchTerm, sorts]);
 
     const totalPages = Math.ceil(filteredRows.length / PAGE_SIZE);
-    const paginatedRows = filteredRows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-    useEffect(() => {
-        setPage((current) => Math.min(current, Math.max(totalPages - 1, 0)));
-    }, [totalPages]);
+    const currentPage = Math.min(page, Math.max(totalPages - 1, 0));
+    const paginatedRows = filteredRows.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
     const activeFilterCount = Number(Boolean(filters.minSilverPerHour)) +
         Number(Boolean(filters.minDailyVolume)) +
@@ -270,7 +269,9 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div className="space-y-2">
                     <h1 className="text-2xl font-bold text-primary flex items-center gap-3">
-                        <Icon size={24} className={getPrimaryAccent(type)} />
+                        {type === 'cooking'
+                            ? <ChefHat size={24} className={getPrimaryAccent(type)} />
+                            : <FlaskConical size={24} className={getPrimaryAccent(type)} />}
                         {type === 'cooking' ? 'Calculadora de Culinária' : 'Calculadora de Alquimia'}
                     </h1>
                     <p className="text-sm text-secondary max-w-3xl">
@@ -422,7 +423,9 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                                                         />
                                                     ) : (
                                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-bg-primary">
-                                                            <Icon size={16} className={getPrimaryAccent(type)} />
+                                                            {type === 'cooking'
+                                                                ? <ChefHat size={16} className={getPrimaryAccent(type)} />
+                                                                : <FlaskConical size={16} className={getPrimaryAccent(type)} />}
                                                         </div>
                                                     )}
                                                 <div className="min-w-0">
@@ -445,7 +448,7 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                                                 type="button"
                                                 onClick={(event) => {
                                                     event.stopPropagation();
-                                                    store.toggleFavorite(type, row.id);
+                                                    toggleFavorite(type, row.id);
                                                 }}
                                             >
                                                 <Heart
@@ -500,14 +503,14 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                         <button
                             type="button"
                             onClick={() => setPage((current) => Math.max(current - 1, 0))}
-                            disabled={page === 0}
+                            disabled={currentPage === 0}
                             className="rounded-lg border border-border bg-bg-hover p-2 text-secondary hover:text-primary disabled:opacity-30"
                         >
                             <ChevronLeft size={16} />
                         </button>
 
                         {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) => {
-                            const pageNumber = page < 3 ? index : page - 2 + index;
+                            const pageNumber = currentPage < 3 ? index : currentPage - 2 + index;
                             if (pageNumber >= totalPages) {
                                 return null;
                             }
@@ -517,7 +520,7 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                                     key={pageNumber}
                                     type="button"
                                     onClick={() => setPage(pageNumber)}
-                                    className={`h-9 w-9 rounded-lg border text-sm font-mono transition-colors ${pageNumber === page
+                                    className={`h-9 w-9 rounded-lg border text-sm font-mono transition-colors ${pageNumber === currentPage
                                         ? 'border-gold bg-gold/10 text-gold'
                                         : 'border-border bg-bg-hover text-secondary hover:text-primary'
                                         }`}
@@ -530,7 +533,7 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
                         <button
                             type="button"
                             onClick={() => setPage((current) => Math.min(current + 1, totalPages - 1))}
-                            disabled={page === totalPages - 1}
+                            disabled={currentPage === totalPages - 1}
                             className="rounded-lg border border-border bg-bg-hover p-2 text-secondary hover:text-primary disabled:opacity-30"
                         >
                             <ChevronRight size={16} />

@@ -1,7 +1,39 @@
 import type { MarketItem } from '../types';
 
-const ARSHA_BASE_URL = 'https://api.arsha.io';
-const SA_REGION = 'sa';
+interface GetMultipleItemPricesProgress {
+    processed: number;
+    total: number;
+    fetched: number;
+    cached: number;
+}
+
+interface GetMultipleItemPricesOptions {
+    batchSize?: number;
+    onProgress?: (progress: GetMultipleItemPricesProgress) => void;
+}
+
+interface MarketItemApiResponse {
+    id?: number;
+    minEnhance?: number;
+    maxEnhance?: number;
+    basePrice?: number;
+    currentStock?: number;
+    totalTrades?: number;
+    priceMin?: number;
+    priceMax?: number;
+    lastSoldPrice?: number;
+    lastSoldTime?: number;
+    resultCode?: number | null;
+}
+
+interface MarketServiceConfig {
+    baseUrl: string;
+    region: string;
+    lang: string;
+}
+
+const DEFAULT_ARSHA_BASE_URL = 'https://api.arsha.io';
+const REQUIRED_MARKET_REGION = 'sa';
 const DEFAULT_LANG = 'pt';
 
 // Rate limiting simples em memória
@@ -63,15 +95,67 @@ async function fetchWithRetry(
     throw lastError ?? new Error('Falha ao conectar com api.arsha.io');
 }
 
+function normalizeConfigValue(value: string | undefined, fallback: string): string {
+    const trimmedValue = value?.trim();
+    return trimmedValue && trimmedValue.length > 0 ? trimmedValue : fallback;
+}
+
+export function resolveMarketServiceConfig(env: NodeJS.ProcessEnv = process.env): MarketServiceConfig {
+    return {
+        baseUrl: normalizeConfigValue(env.ARSHA_API_URL, DEFAULT_ARSHA_BASE_URL).replace(/\/+$/, ''),
+        region: normalizeConfigValue(env.ARSHA_REGION, REQUIRED_MARKET_REGION).toLowerCase(),
+        lang: normalizeConfigValue(env.ARSHA_LANG, DEFAULT_LANG).toLowerCase(),
+    };
+}
+
+export function assertSupportedMarketRegion(region: string): 'sa' {
+    const normalizedRegion = String(region ?? '').trim().toLowerCase();
+
+    if (normalizedRegion !== REQUIRED_MARKET_REGION) {
+        throw new Error(`Região de mercado inválida: esperado 'sa', recebido '${normalizedRegion || 'vazio'}'.`);
+    }
+
+    return REQUIRED_MARKET_REGION;
+}
+
+export function getConfiguredMarketRegion(env: NodeJS.ProcessEnv = process.env): 'sa' {
+    return assertSupportedMarketRegion(resolveMarketServiceConfig(env).region);
+}
+
 /**
  * Busca dados de um item específico via api.arsha.io v2.
  */
+export function parseMarketItemResponse(
+    data: MarketItemApiResponse | null | undefined,
+    fallbackItemId: number,
+): MarketItem | null {
+    if (!data || (data.resultCode != null && data.resultCode !== 0)) {
+        return null;
+    }
+
+    return {
+        id: data.id ?? fallbackItemId,
+        minEnhance: data.minEnhance ?? 0,
+        maxEnhance: data.maxEnhance ?? 0,
+        basePrice: data.basePrice ?? 0,
+        currentStock: data.currentStock ?? 0,
+        totalTrades: data.totalTrades ?? 0,
+        priceMin: data.priceMin ?? 0,
+        priceMax: data.priceMax ?? 0,
+        lastSoldPrice: data.lastSoldPrice ?? 0,
+        lastSoldTime: data.lastSoldTime ?? 0,
+    };
+}
+
 export async function getItemPrice(
     itemId: number,
     sid?: number,
 ): Promise<MarketItem | null> {
+    const config = resolveMarketServiceConfig();
+    const region = assertSupportedMarketRegion(config.region);
+
     try {
-        let url = `${ARSHA_BASE_URL}/v2/${SA_REGION}/item?id=${itemId}&lang=${DEFAULT_LANG}`;
+        let url = `${config.baseUrl}/v2/${region}/item?id=${itemId}&lang=${config.lang}`;
         if (sid !== undefined) {
             url += `&sid=${sid}`;
         }
@@ -79,20 +163,7 @@ export async function getItemPrice(
         const response = await fetchWithRetry(url);
         const data = await response.json();
 
-        if (!data || data.resultCode !== 0) return null;
-
-        return {
-            id: data.id ?? itemId,
-            minEnhance: data.minEnhance ?? 0,
-            maxEnhance: data.maxEnhance ?? 0,
-            basePrice: data.basePrice ?? 0,
-            currentStock: data.currentStock ?? 0,
-            totalTrades: data.totalTrades ?? 0,
-            priceMin: data.priceMin ?? 0,
-            priceMax: data.priceMax ?? 0,
-            lastSoldPrice: data.lastSoldPrice ?? 0,
-            lastSoldTime: data.lastSoldTime ?? 0,
-        };
+        return parseMarketItemResponse(data, itemId);
     } catch (error) {
         console.error(`Erro ao buscar item ${itemId}:`, error);
         return null;
@@ -108,6 +179,7 @@ const CACHE_TTL_MS = 60 * 1000; // 60 segundos
  */
 export async function getMultipleItemPrices(
     itemIds: number[],
+    options: GetMultipleItemPricesOptions = {},
 ): Promise<Map<number, MarketItem>> {
     const results = new Map<number, MarketItem>();
     const missingIds: number[] = [];
@@ -124,10 +196,24 @@ export async function getMultipleItemPrices(
         }
     }
 
-    if (missingIds.length === 0) return results;
+    const cachedCount = results.size;
+    const totalCount = itemIds.length;
+    const totalMissing = missingIds.length;
+
+    if (totalMissing === 0) {
+        options.onProgress?.({
+            processed: totalCount,
+            total: totalCount,
+            fetched: 0,
+            cached: cachedCount,
+        });
+        return results;
+    }
 
     // Processar itens não em cache (missingIds) em lotes de 5
-    const batchSize = 5;
+    const batchSize = Math.max(1, Math.trunc(options.batchSize ?? 5));
+    let fetchedCount = 0;
+
     for (let i = 0; i < missingIds.length; i += batchSize) {
         const batch = missingIds.slice(i, i + batchSize);
         const promises = batch.map(async (id) => {
@@ -138,6 +224,14 @@ export async function getMultipleItemPrices(
             }
         });
         await Promise.all(promises);
+
+        fetchedCount += batch.length;
+        options.onProgress?.({
+            processed: cachedCount + fetchedCount,
+            total: totalCount,
+            fetched: fetchedCount,
+            cached: cachedCount,
+        });
     }
 
     return results;
@@ -147,8 +241,11 @@ export async function getMultipleItemPrices(
  * Busca itens em alta no mercado (Hot List).
  */
 export async function getHotList(): Promise<MarketItem[]> {
+    const config = resolveMarketServiceConfig();
+    const region = assertSupportedMarketRegion(config.region);
+
     try {
-        const url = `${ARSHA_BASE_URL}/v2/${SA_REGION}/GetWorldMarketHotList`;
+        const url = `${config.baseUrl}/v2/${region}/GetWorldMarketHotList`;
         const response = await fetchWithRetry(url);
         const data = await response.json();
 

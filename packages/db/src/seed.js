@@ -4,14 +4,27 @@ const path = require('path');
 
 const itemsPath = path.join(__dirname, 'seed-data', 'items.json');
 const recipesPath = path.join(__dirname, 'seed-data', 'recipes.json');
-const marketPricesPath = path.join(__dirname, 'seed-data', 'market_prices.json');
 const canonicalRecipesPath = path.join(__dirname, '..', 'bdo_recipes.json');
 
 const items = fs.existsSync(itemsPath) ? require('./seed-data/items.json') : [];
 const recipes = fs.existsSync(recipesPath) ? require('./seed-data/recipes.json') : [];
-const marketPrices = fs.existsSync(marketPricesPath) ? require('./seed-data/market_prices.json') : [];
 
 const prisma = new PrismaClient();
+
+function toNumberOrDefault(value, defaultValue) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : defaultValue;
+}
+
+function toPositiveNumberOrDefault(value, defaultValue) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
+}
+
+function toNullablePositiveNumber(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
 
 function loadCanonicalRecipeTypes() {
     const typeMap = new Map();
@@ -55,26 +68,27 @@ function normalizeRecipesForSeed(inputRecipes) {
 
 async function main() {
     console.log('Inciando seed do banco de dados...');
+    console.log('Limpando snapshots e histórico de mercado legados do seed...');
+    await prisma.priceHistory.deleteMany();
+    await prisma.itemPrice.deleteMany();
 
     if (items.length > 0) {
         console.log(`Temos ${items.length} itens para fazer seed... aguarde (pode demorar).`);
         let count = 0;
         for (const item of items) {
+            const itemData = {
+                name: item.name,
+                iconUrl: item.iconUrl || null,
+                grade: toNumberOrDefault(item.grade, 0),
+                categoryId: item.categoryId ?? null,
+                subCategoryId: item.subCategoryId ?? null,
+                isTradeable: item.isTradeable !== undefined ? Boolean(item.isTradeable) : true,
+            };
+
             await prisma.item.upsert({
                 where: { id: item.id },
-                update: {
-                    name: item.name,
-                    iconUrl: item.iconUrl || null,
-                    grade: item.grade || 0,
-                    categoryId: item.categoryId || null,
-                },
-                create: {
-                    id: item.id,
-                    name: item.name,
-                    iconUrl: item.iconUrl || null,
-                    grade: item.grade || 0,
-                    categoryId: item.categoryId || null,
-                },
+                update: itemData,
+                create: { id: item.id, ...itemData },
             });
             count++;
             if (count % 1000 === 0) console.log(`  ...${count} itens inseridos`);
@@ -82,97 +96,42 @@ async function main() {
         console.log('Seed de Itens concluido!');
     }
 
-    if (marketPrices.length > 0) {
-        console.log(`Temos ${marketPrices.length} precos de mercado para atualizar...`);
-        let countP = 0;
-        for (const p of marketPrices) {
-            try {
-                await prisma.itemPrice.upsert({
-                    where: {
-                        itemId_enhancementLevel: {
-                            itemId: p.item_id,
-                            enhancementLevel: p.enhancement_level,
-                        },
-                    },
-                    update: {
-                        basePrice: p.price,
-                        lastSoldPrice: p.price,
-                        currentStock: p.in_stock,
-                        totalTrades: p.total_trades,
-                        recordedAt: new Date(),
-                    },
-                    create: {
-                        itemId: p.item_id,
-                        enhancementLevel: p.enhancement_level,
-                        basePrice: p.price,
-                        lastSoldPrice: p.price,
-                        currentStock: p.in_stock,
-                        totalTrades: p.total_trades,
-                        recordedAt: new Date(),
-                    },
-                });
-
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                await prisma.priceHistory.upsert({
-                    where: {
-                        itemId_enhancementLevel_recordedDate: {
-                            itemId: p.item_id,
-                            enhancementLevel: p.enhancement_level,
-                            recordedDate: today,
-                        },
-                    },
-                    update: {
-                        price: p.price,
-                        volume: p.total_trades,
-                    },
-                    create: {
-                        itemId: p.item_id,
-                        enhancementLevel: p.enhancement_level,
-                        recordedDate: today,
-                        price: p.price,
-                        volume: p.total_trades,
-                    },
-                });
-                countP++;
-            } catch (e) {
-                // Ignore items that failed foreign key
-            }
-            if (countP > 0 && countP % 2000 === 0) console.log(`  ...${countP} precos inseridos`);
-        }
-        console.log('Seed de Precos da API concluido!');
-    }
-
     const normalizedRecipes = normalizeRecipesForSeed(recipes);
     if (normalizedRecipes.length > 0) {
         console.log(`Temos ${normalizedRecipes.length} receitas para fazer seed...`);
+        const recipeIds = normalizedRecipes.map((recipe) => recipe.id);
+        const deletedIngredients = await prisma.recipeIngredient.deleteMany({
+            where: { recipeId: { notIn: recipeIds } },
+        });
+        const deletedRecipes = await prisma.recipe.deleteMany({
+            where: { id: { notIn: recipeIds } },
+        });
+
+        if (deletedRecipes.count > 0 || deletedIngredients.count > 0) {
+            console.log(
+                `Removidas ${deletedRecipes.count} receitas órfãs e ${deletedIngredients.count} linhas de ingredientes órfãs.`,
+            );
+        }
+
         let rCount = 0;
         for (const recipe of normalizedRecipes) {
             try {
+                const recipeData = {
+                    name: recipe.name,
+                    type: recipe.type,
+                    resultItemId: recipe.resultItemId,
+                    resultQuantity: toPositiveNumberOrDefault(recipe.resultQuantity, 1.0),
+                    procItemId: recipe.procItemId || null,
+                    procQuantity: toNullablePositiveNumber(recipe.procQuantity),
+                    experience: Math.trunc(toNumberOrDefault(recipe.experience, 0)),
+                    cookTimeSeconds: toNumberOrDefault(recipe.cookTimeSeconds, 0),
+                    categoryId: recipe.categoryId ?? null,
+                };
+
                 const upsertedRecipe = await prisma.recipe.upsert({
                     where: { id: recipe.id },
-                    update: {
-                        name: recipe.name,
-                        type: recipe.type,
-                        resultItemId: recipe.resultItemId,
-                        resultQuantity: parseFloat(recipe.resultQuantity) || 1.0,
-                        procItemId: recipe.procItemId || null,
-                        procQuantity: recipe.procQuantity ? parseFloat(recipe.procQuantity) : null,
-                        experience: recipe.experience || 400,
-                        cookTimeSeconds: recipe.cookTimeSeconds || 1.0,
-                    },
-                    create: {
-                        id: recipe.id,
-                        name: recipe.name,
-                        type: recipe.type,
-                        resultItemId: recipe.resultItemId,
-                        resultQuantity: parseFloat(recipe.resultQuantity) || 1.0,
-                        procItemId: recipe.procItemId || null,
-                        procQuantity: recipe.procQuantity ? parseFloat(recipe.procQuantity) : null,
-                        experience: recipe.experience || 400,
-                        cookTimeSeconds: recipe.cookTimeSeconds || 1.0,
-                    },
+                    update: recipeData,
+                    create: { id: recipe.id, ...recipeData },
                 });
 
                 await prisma.recipeIngredient.deleteMany({

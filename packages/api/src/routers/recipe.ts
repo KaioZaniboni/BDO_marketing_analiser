@@ -6,7 +6,6 @@ import {
     analyzeProfitability,
     rankRecipes,
 } from '../services/calculator';
-import { getMultipleItemPrices } from '../services/market';
 import { IMPERIAL_TIERS, getImperialBonus, IMPERIAL_RECIPES_MAPPING } from '../services/imperial-data';
 import {
     compareRecipesByTypeNameId,
@@ -15,7 +14,8 @@ import {
     normalizeRecipeType,
     type SupportedRecipeType,
 } from '../services/recipe-classification';
-import type { RankingWeights } from '../types';
+import { getMultipleItemPrices } from '../services/market';
+import type { MarketItem, RankingWeights } from '../types';
 
 const taxConfigSchema = z.object({
     baseTaxRate: z.number().min(0).max(1).default(0.35),
@@ -35,6 +35,44 @@ const imperialListSchema = z.object({
     mastery: z.number().min(0).max(2000).default(0),
     taxConfig: taxConfigSchema.optional(),
 });
+
+function getSnapshotPrice(
+    snapshot: {
+        basePrice: bigint;
+        lastSoldPrice: bigint | null;
+    } | null | undefined,
+): number {
+    if (!snapshot) {
+        return 0;
+    }
+
+    return Number(snapshot.lastSoldPrice ?? snapshot.basePrice);
+}
+
+function toMarketItem(
+    itemId: number,
+    snapshot: {
+        basePrice: bigint;
+        lastSoldPrice: bigint | null;
+        currentStock: number;
+        totalTrades: bigint;
+        priceMin: bigint | null;
+        priceMax: bigint | null;
+    } | null | undefined,
+): MarketItem {
+    return {
+        id: itemId,
+        minEnhance: 0,
+        maxEnhance: 0,
+        basePrice: Number(snapshot?.basePrice ?? 0),
+        currentStock: snapshot?.currentStock ?? 0,
+        totalTrades: Number(snapshot?.totalTrades ?? 0),
+        priceMin: Number(snapshot?.priceMin ?? 0),
+        priceMax: Number(snapshot?.priceMax ?? 0),
+        lastSoldPrice: getSnapshotPrice(snapshot),
+        lastSoldTime: 0,
+    };
+}
 
 export const recipeRouter = router({
     /** Lista todas as receitas com filtros */
@@ -136,7 +174,14 @@ export const recipeRouter = router({
                 where: { id: input.recipeId },
                 include: {
                     resultItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                        include: {
+                            prices: { where: { enhancementLevel: 0 }, take: 1 },
+                            priceHistory: {
+                                where: { enhancementLevel: 0 },
+                                take: 28,
+                                orderBy: { recordedDate: 'desc' },
+                            },
+                        },
                     },
                     procItem: {
                         include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
@@ -160,6 +205,12 @@ export const recipeRouter = router({
             const rawVariants = await ctx.prisma.recipe.findMany({
                 where: { name: recipe.name, resultItemId: recipe.resultItemId },
                 include: {
+                    resultItem: {
+                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                    },
+                    procItem: {
+                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                    },
                     ingredients: {
                         include: {
                             item: {
@@ -172,6 +223,11 @@ export const recipeRouter = router({
             });
             const variants = filterRecipesByTypes(rawVariants, [normalizedRecipe.type as SupportedRecipeType]);
 
+            const collectedRecipes = new Map<number, (typeof variants)[number]>();
+            variants.forEach((variant) => {
+                collectedRecipes.set(variant.id, variant);
+            });
+
             // Busca todas as sub-receitas referentes a todos os poss??veis ingredientes
             const allIngItemIds = new Set<number>();
             variants.forEach(v => v.ingredients.forEach(i => allIngItemIds.add(i.itemId)));
@@ -183,6 +239,52 @@ export const recipeRouter = router({
             const subRecipes = filterRecipesByTypes(rawSubRecipes);
             const subRecipeMap = new Map<number, { id: number, type: string }>();
             subRecipes.forEach((sr: any) => { if (!subRecipeMap.has(sr.resultItemId)) subRecipeMap.set(sr.resultItemId, { id: sr.id, type: sr.type }); });
+
+            const pendingResultItemIds = new Set<number>(Array.from(allIngItemIds));
+            const visitedResultItemIds = new Set<number>();
+
+            while (pendingResultItemIds.size > 0) {
+                const batchItemIds = Array.from(pendingResultItemIds).filter((itemId) => !visitedResultItemIds.has(itemId));
+                pendingResultItemIds.clear();
+
+                if (batchItemIds.length === 0) {
+                    break;
+                }
+
+                batchItemIds.forEach((itemId) => visitedResultItemIds.add(itemId));
+
+                const rawRelatedRecipes = await ctx.prisma.recipe.findMany({
+                    where: { resultItemId: { in: batchItemIds } },
+                    include: {
+                        resultItem: {
+                            include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                        },
+                        procItem: {
+                            include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                        },
+                        ingredients: {
+                            include: {
+                                item: {
+                                    include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                                },
+                            },
+                            orderBy: { sortOrder: 'asc' },
+                        },
+                    },
+                });
+
+                const relatedRecipes = filterRecipesByTypes(rawRelatedRecipes);
+
+                for (const relatedRecipe of relatedRecipes) {
+                    collectedRecipes.set(relatedRecipe.id, relatedRecipe);
+
+                    relatedRecipe.ingredients.forEach((ingredient) => {
+                        if (!visitedResultItemIds.has(ingredient.itemId)) {
+                            pendingResultItemIds.add(ingredient.itemId);
+                        }
+                    });
+                }
+            }
 
             // Build co-occurrence matrix to find valid slots
             const coOccurs = new Set<string>();
@@ -228,7 +330,11 @@ export const recipeRouter = router({
                 });
             });
 
-            return { ...normalizedRecipe, ingredientAlternatives };
+            return {
+                ...normalizedRecipe,
+                ingredientAlternatives,
+                treeRecipes: Array.from(collectedRecipes.values()).sort(compareRecipesByTypeNameId),
+            };
         }),
 
     /** Retorna as caixas imperiais suportadas com cálculo otimizado (BDOLytics Clone) */
@@ -242,7 +348,16 @@ export const recipeRouter = router({
                     resultItemId: { in: validIds },
                 },
                 include: {
-                    resultItem: { include: { prices: { where: { enhancementLevel: 0 }, take: 1 } } },
+                    resultItem: {
+                        include: {
+                            prices: { where: { enhancementLevel: 0 }, take: 1 },
+                            priceHistory: {
+                                where: { enhancementLevel: 0 },
+                                take: 1,
+                                orderBy: { recordedDate: 'desc' },
+                            },
+                        },
+                    },
                     ingredients: {
                         include: {
                             item: { include: { prices: { where: { enhancementLevel: 0 }, take: 1 } } }
@@ -279,7 +394,7 @@ export const recipeRouter = router({
             const out = uniqueRecipes.map(r => {
                 const boxInfo = IMPERIAL_RECIPES_MAPPING[r.resultItemId];
                 const baseItemPrice = Number(r.resultItem?.prices?.[0]?.lastSoldPrice ?? r.resultItem?.prices?.[0]?.basePrice ?? 0);
-                const dailyVolume = Number(r.resultItem?.prices?.[0]?.totalTrades ?? 0);
+                const dailyVolume = Number(r.resultItem?.priceHistory?.[0]?.volume ?? 0);
 
                 // NPC Paga = (BasePrice * 2.5) + (BasePrice * 2.5 * MasteryBonus)
                 const masteryBonusPct = getImperialBonus(input.mastery) / 100;
@@ -401,9 +516,22 @@ export const recipeRouter = router({
             const rawRecipes = await ctx.prisma.recipe.findMany({
                 include: {
                     resultItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                        include: {
+                            prices: { where: { enhancementLevel: 0 }, take: 1 },
+                            priceHistory: {
+                                where: { enhancementLevel: 0 },
+                                take: 1,
+                                orderBy: { recordedDate: 'desc' },
+                            },
+                        },
                     },
-                    ingredients: { include: { item: true } },
+                    ingredients: {
+                        include: {
+                            item: {
+                                include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
+                            },
+                        },
+                    },
                 },
             });
 
@@ -423,23 +551,61 @@ export const recipeRouter = router({
                 .sort(compareRecipesByTypeNameId)
                 .slice(0, input.limit);
 
-            // Buscar preços de mercado para todos os itens resultado
-            const resultItemIds = recipes.map((r: { resultItemId: number }) => r.resultItemId);
-            const marketData = await getMultipleItemPrices(resultItemIds);
+            const marketData = new Map<number, MarketItem>(
+                recipes.map((recipe: {
+                    resultItemId: number;
+                    resultItem: {
+                        prices: Array<{
+                            basePrice: bigint;
+                            lastSoldPrice: bigint | null;
+                            currentStock: number;
+                            totalTrades: bigint;
+                            priceMin: bigint | null;
+                            priceMax: bigint | null;
+                        }>;
+                    };
+                }) => [
+                    recipe.resultItemId,
+                    toMarketItem(recipe.resultItemId, recipe.resultItem.prices[0]),
+                ]),
+            );
 
             // Calcular análise simplificada (sem inventário de usuário)
             const defaultTax = { baseTaxRate: 0.35, hasValuePack: true, hasMerchantRing: false, familyFame: 0 };
             const emptyInventory = new Map<number, number>();
 
-            // Buscar todos os preços de ingredientes
-            const allIngredientIds = Array.from(new Set<number>(recipes.flatMap((r: { ingredients: Array<{ itemId: number }> }) => r.ingredients.map((i: { itemId: number }) => i.itemId))));
-            const allPrices = await getMultipleItemPrices(allIngredientIds);
             const priceMap = new Map<number, number>();
-            for (const [id, item] of allPrices) {
-                priceMap.set(id, item.lastSoldPrice || item.basePrice);
+
+            for (const recipe of recipes as Array<{
+                ingredients: Array<{
+                    itemId: number;
+                    item: {
+                        prices: Array<{
+                            basePrice: bigint;
+                            lastSoldPrice: bigint | null;
+                        }>;
+                    };
+                }>;
+            }>) {
+                for (const ingredient of recipe.ingredients) {
+                    if (!priceMap.has(ingredient.itemId)) {
+                        priceMap.set(ingredient.itemId, getSnapshotPrice(ingredient.item.prices[0]));
+                    }
+                }
             }
 
-            const recipesForRanking = recipes.map((recipe: { id: number; name: string; type: string; resultItemId: number; resultQuantity: number; resultItem: { prices: Array<{ lastSoldPrice: bigint | null; basePrice: bigint }> }; ingredients: Array<{ itemId: number; quantity: number }> }) => {
+            const recipesForRanking = recipes.map((recipe: {
+                id: number;
+                name: string;
+                type: string;
+                resultItemId: number;
+                resultQuantity: number;
+                resultItem: {
+                    prices: Array<{ lastSoldPrice: bigint | null; basePrice: bigint }>;
+                    priceHistory: Array<{ volume: number }>;
+                };
+                ingredients: Array<{ itemId: number; quantity: number }>;
+            }) => {
                 const match = matchInventory(
                     recipe.id,
                     recipe.ingredients.map((i: { itemId: number; quantity: number }) => ({ itemId: i.itemId, quantity: i.quantity })),
@@ -448,7 +614,7 @@ export const recipeRouter = router({
                 );
 
                 const resultPrice = recipe.resultItem.prices[0]
-                    ? Number(recipe.resultItem.prices[0].lastSoldPrice ?? recipe.resultItem.prices[0].basePrice)
+                    ? getSnapshotPrice(recipe.resultItem.prices[0])
                     : 0;
 
                 const analysis = analyzeProfitability(
@@ -465,13 +631,14 @@ export const recipeRouter = router({
                     recipeName: recipe.name,
                     recipeType: recipe.type,
                     resultItemId: recipe.resultItemId,
+                    dailyVolume: Number(recipe.resultItem.priceHistory[0]?.volume ?? 0),
                     analysis,
                 };
             });
 
             return rankRecipes(
                 recipesForRanking,
-                Object.fromEntries(marketData) as unknown as Map<number, any>,
+                marketData,
                 input.weights,
             );
         }),

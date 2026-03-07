@@ -1,0 +1,158 @@
+{
+  "db": {
+    "itemPriceCount": 9972,
+    "priceHistoryCount": 9972,
+    "latestPrices": [
+      {
+        "itemId": 820955,
+        "basePrice": "135000000",
+        "recordedAt": "2026-03-07T02:58:25.370Z"
+      },
+      {
+        "itemId": 820826,
+        "basePrice": "17500",
+        "recordedAt": "2026-03-07T02:58:25.368Z"
+      },
+      {
+        "itemId": 754064,
+        "basePrice": "117000000",
+        "recordedAt": "2026-03-07T02:58:25.365Z"
+      },
+      {
+        "itemId": 820307,
+        "basePrice": "84500",
+        "recordedAt": "2026-03-07T02:58:25.363Z"
+      },
+      {
+        "itemId": 754065,
+        "basePrice": "75500000",
+        "recordedAt": "2026-03-07T02:58:25.362Z"
+      },
+      {
+        "itemId": 617184,
+        "basePrice": "525000000",
+        "recordedAt": "2026-03-07T02:58:25.360Z"
+      },
+      {
+        "itemId": 612925,
+        "basePrice": "525000000",
+        "recordedAt": "2026-03-07T02:58:25.358Z"
+      },
+      {
+        "itemId": 608080,
+        "basePrice": "225000000",
+        "recordedAt": "2026-03-07T02:58:25.357Z"
+      },
+      {
+        "itemId": 612768,
+        "basePrice": "225000000",
+        "recordedAt": "2026-03-07T02:58:25.355Z"
+      },
+      {
+        "itemId": 606339,
+        "basePrice": "187000000",
+        "recordedAt": "2026-03-07T02:58:25.353Z"
+      }
+    ],
+    "latestHistory": [
+      {
+        "itemId": 206,
+        "price": "90000",
+        "volume": 3707,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 207,
+        "price": "39700",
+        "volume": 26005,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 208,
+        "price": "61000",
+        "volume": 495,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 212,
+        "price": "1650",
+        "volume": 1702187,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 215,
+        "price": "100000",
+        "volume": 203063,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 504,
+        "price": "100000",
+        "volume": 436967,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 505,
+        "price": "100000",
+        "volume": 27824,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 506,
+        "price": "100000",
+        "volume": 234898,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 507,
+        "price": "100000",
+        "volume": 292112,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      },
+      {
+        "itemId": 508,
+        "price": "100000",
+        "volume": 20525,
+        "recordedDate": "2026-03-06T00:00:00.000Z"
+      }
+    ]
+  },
+  "api": {
+    "catalogTotal": 519,
+    "catalogByType": {
+      "cooking": 280,
+      "alchemy": 239,
+      "processing": 0
+    },
+    "cookingTop": [
+      {},
+      {},
+      {}
+    ],
+    "alchemyTop": [
+      {},
+      {},
+      {}
+    ]
+  },
+  "http": {
+    "cooking": 200,
+    "alchemy": 200
+  },
+  "overview": {
+    "cooking": {
+      "count": 153,
+      "positiveSilver": 35,
+      "positiveVolume": 153,
+      "maxSilver": 20729356935.58962,
+      "maxVolume": 1109371749
+    },
+    "alchemy": {
+      "count": 152,
+      "positiveSilver": 29,
+      "positiveVolume": 100,
+      "maxSilver": 28098575956.62001,
+      "maxVolume": 507632455
+    }
+  }
+}

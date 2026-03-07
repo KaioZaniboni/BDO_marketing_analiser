@@ -1,0 +1,17 @@
+Iniciando job de sync. Buscando itens de interesse...
+Encontrados 9972 itens tradeable.
+Modo direcionado ativo para validação: processando 5 IDs explícitos.
+Buscando preços atualizados da API...
+Progresso da coleta de mercado: 1/5
+Progresso da coleta de mercado: 2/5
+Progresso da coleta de mercado: 3/5
+Progresso da coleta de mercado: 4/5
+Progresso da coleta de mercado: 5/5
+Recebidas 5 respostas do mercado. Atualizando DB...
+Progresso da persistência: 1/5
+Progresso da persistência: 2/5
+Progresso da persistência: 3/5
+Progresso da persistência: 4/5
+Progresso da persistência: 5/5
+✅ Sincronização finalizada. 5 registros afetados.
+DONE
