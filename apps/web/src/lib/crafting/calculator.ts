@@ -30,6 +30,7 @@ export interface CalculatorItem {
     name: string;
     weight?: number | null;
     grade?: number | null;
+    isTradeable?: boolean | null;
     iconUrl?: string | null;
     prices?: CalculatorPriceSnapshot[];
     priceHistory?: CalculatorPriceHistoryPoint[];
@@ -184,6 +185,11 @@ export interface RecipeTreeNode {
     children: RecipeTreeNode[];
     leftover: LeftoverRow[];
     ingredientAlternatives: Record<number, IngredientAlternative[]>;
+    unitPrice?: number;
+    priceSource?: PriceBreakdown['source'];
+    iconUrl?: string | null;
+    grade?: number | null;
+    isTradeable?: boolean | null;
 }
 
 export interface RecipeOverviewRow {
@@ -689,6 +695,11 @@ function buildMaterialNode(
         children: [],
         leftover: [],
         ingredientAlternatives: {},
+        unitPrice: price.unitPrice,
+        priceSource: price.source,
+        iconUrl: option.item.iconUrl,
+        grade: option.item.grade,
+        isTradeable: option.item.isTradeable,
     };
 }
 
@@ -815,6 +826,11 @@ function buildRecipeNode(
         children,
         leftover: [],
         ingredientAlternatives,
+        unitPrice: mainPrice.unitPrice,
+        priceSource: mainPrice.source,
+        iconUrl: recipe.resultItem.iconUrl,
+        grade: recipe.resultItem.grade,
+        isTradeable: recipe.resultItem.isTradeable,
     };
 }
 

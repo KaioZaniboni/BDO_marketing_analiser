@@ -64,16 +64,18 @@ describe('CraftingRecipeMainPanel', () => {
     it('renderiza tabs, conteúdo e summary do detalhe', () => {
         const html = renderToStaticMarkup(
             <CraftingRecipeMainPanel
-                activeTab="outputs"
+                activeTab="overview"
                 onActiveTabChange={vi.fn()}
                 detailContentProps={detailContentProps}
             />,
         );
 
-        expect(html).toContain('data-tab="outputs"');
-        expect(html).toContain('>Outputs<');
+        expect(html).toContain('data-tab="overview"');
+        expect(html).toContain('>Entrada &amp; saída<');
+        expect(html).toContain('>Entradas<');
+        expect(html).toContain('>Saídas<');
         expect(html).toContain('>Output Elixir<');
-        expect(html).toContain('>Cost<');
-        expect(html).toContain('>Profit / H<');
+        expect(html).toContain('>Custo<');
+        expect(html).toContain('>Lucro / h<');
     });
 });

@@ -17,6 +17,7 @@ export interface CraftingRecipeHeaderProps {
     resultItemGrade?: number | null;
     resultItemIconUrl?: string | null;
     resultPrice: number;
+    resultPriceSource: 'custom' | 'market' | 'vendor' | 'missing';
     craftQuantity: number;
     slowCookEnabled: boolean;
     showSettings: boolean;
@@ -33,6 +34,7 @@ export function CraftingRecipeHeader({
     resultItemGrade,
     resultItemIconUrl,
     resultPrice,
+    resultPriceSource,
     craftQuantity,
     slowCookEnabled,
     showSettings,
@@ -43,6 +45,12 @@ export function CraftingRecipeHeader({
 }: CraftingRecipeHeaderProps) {
     const resultIconUrl = resolveBdoIconUrl(resultItemIconUrl);
     const Icon = recipeType === 'alchemy' ? FlaskConical : ChefHat;
+    const priceSourceLabel = {
+        market: 'Mercado',
+        custom: 'Manual',
+        vendor: 'Vendor/NPC',
+        missing: 'Sem preço',
+    }[resultPriceSource];
 
     return (
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -76,9 +84,14 @@ export function CraftingRecipeHeader({
                                 {recipeType}
                             </span>
                         </div>
-                        <p className="mt-1 text-sm text-secondary">
-                            Resultado base: {resultQuantity} • Preço mercado: {resultPrice.toLocaleString('pt-BR')}
-                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-secondary">
+                            <span>Resultado base: {resultQuantity} por craft</span>
+                            <span>•</span>
+                            <span>Preço de referência: {resultPrice.toLocaleString('pt-BR')}</span>
+                            <span className="rounded-full border border-border bg-bg-hover/40 px-2 py-0.5 text-[11px] font-medium text-primary">
+                                {priceSourceLabel}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -86,7 +99,7 @@ export function CraftingRecipeHeader({
             <div className="flex flex-wrap items-center gap-3">
                 <label className="flex items-center gap-2 rounded-2xl border border-border bg-bg-hover px-4 py-3 text-sm text-primary">
                     <Sparkles size={16} className="text-gold" />
-                    Craft Qty
+                    Quantidade
                     <input
                         type="number"
                         value={craftQuantity}
@@ -98,7 +111,7 @@ export function CraftingRecipeHeader({
                 {recipeType === 'cooking' && (
                     <label className="flex items-center gap-2 rounded-2xl border border-border bg-bg-hover px-4 py-3 text-sm text-primary">
                         <Clock3 size={16} className="text-gold" />
-                        Slow cook
+                        Cozimento lento
                         <input
                             type="checkbox"
                             checked={slowCookEnabled}
@@ -113,7 +126,7 @@ export function CraftingRecipeHeader({
                     onClick={onToggleShowSettings}
                     className="rounded-2xl border border-border bg-bg-hover px-4 py-3 text-sm text-primary transition-colors hover:border-gold"
                 >
-                    {showSettings ? 'Árvore' : 'Settings'}
+                    {showSettings ? 'Árvore' : 'Configurações'}
                 </button>
             </div>
         </div>

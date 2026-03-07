@@ -1,14 +1,13 @@
 'use client';
 
-import { Package2, Scale, Sparkles, TreePine, type LucideIcon } from 'lucide-react';
+import { Package2, Scale, TreePine, type LucideIcon } from 'lucide-react';
 
-export type DetailTab = 'inputs' | 'outputs' | 'analytics' | 'weight';
+export type DetailTab = 'overview' | 'analytics' | 'weight';
 
 const DETAIL_TABS: Array<{ id: DetailTab; label: string; icon: LucideIcon }> = [
-    { id: 'inputs', label: 'Inputs', icon: Package2 },
-    { id: 'outputs', label: 'Outputs', icon: Sparkles },
-    { id: 'analytics', label: 'Analytics', icon: TreePine },
-    { id: 'weight', label: 'Weight', icon: Scale },
+    { id: 'overview', label: 'Entrada & saída', icon: Package2 },
+    { id: 'analytics', label: 'Análise', icon: TreePine },
+    { id: 'weight', label: 'Peso', icon: Scale },
 ];
 
 export function DetailTabsHeader({

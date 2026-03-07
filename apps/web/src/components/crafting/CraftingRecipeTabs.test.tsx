@@ -8,21 +8,19 @@ describe('DetailTabsHeader', () => {
             <DetailTabsHeader activeTab="analytics" onChange={vi.fn()} />,
         );
 
-        expect(html).toContain('data-tab="inputs"');
-        expect(html).toContain('data-tab="outputs"');
+        expect(html).toContain('data-tab="overview"');
         expect(html).toContain('data-tab="analytics"');
         expect(html).toContain('data-tab="weight"');
-        expect(html).toContain('>Inputs<');
-        expect(html).toContain('>Outputs<');
-        expect(html).toContain('>Analytics<');
-        expect(html).toContain('>Weight<');
+        expect(html).toContain('>Entrada &amp; saída<');
+        expect(html).toContain('>Análise<');
+        expect(html).toContain('>Peso<');
 
         const analyticsSegment = html.split('data-tab="analytics"')[1] ?? '';
-        const inputsSegment = html.split('data-tab="inputs"')[1] ?? '';
+        const overviewSegment = html.split('data-tab="overview"')[1] ?? '';
 
         expect(analyticsSegment).toContain('aria-pressed="true"');
         expect(analyticsSegment).toContain('bg-gold/10 text-gold');
-        expect(inputsSegment).toContain('aria-pressed="false"');
-        expect(inputsSegment).toContain('text-secondary hover:text-primary');
+        expect(overviewSegment).toContain('aria-pressed="false"');
+        expect(overviewSegment).toContain('text-secondary hover:text-primary');
     });
 });

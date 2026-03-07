@@ -100,7 +100,7 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
         toggleRareProc,
         setSelectedMaterial,
     } = useCraftingCalculatorStore(useShallow(selectCalculatorActions));
-    const [activeTab, setActiveTab] = useState<DetailTab>('inputs');
+    const [activeTab, setActiveTab] = useState<DetailTab>('overview');
     const [showSettings, setShowSettings] = useState(false);
     const { data: recipeData, isLoading } = trpc.recipe.getById.useQuery({ recipeId });
 
@@ -180,7 +180,7 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
         return <CraftingRecipeNotFoundState onBack={() => router.back()} />;
     }
 
-    const resultPrice = getItemPriceBreakdown(recipe.resultItem, calculatorState).unitPrice;
+    const resultPriceBreakdown = getItemPriceBreakdown(recipe.resultItem, calculatorState);
 
     return (
         <div className="flex flex-col gap-6 pb-24">
@@ -190,7 +190,8 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
                 resultQuantity={recipe.resultQuantity}
                 resultItemGrade={recipe.resultItem.grade}
                 resultItemIconUrl={recipe.resultItem.iconUrl}
-                resultPrice={resultPrice}
+                resultPrice={resultPriceBreakdown.unitPrice}
+                resultPriceSource={resultPriceBreakdown.source}
                 craftQuantity={craftQuantity}
                 slowCookEnabled={slowCookedIds.includes(recipeId)}
                 showSettings={showSettings}

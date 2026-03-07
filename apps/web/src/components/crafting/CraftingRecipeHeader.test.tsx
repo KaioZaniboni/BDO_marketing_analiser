@@ -12,6 +12,7 @@ describe('CraftingRecipeHeader', () => {
                 resultItemGrade={1}
                 resultItemIconUrl={null}
                 resultPrice={12345}
+                resultPriceSource="market"
                 craftQuantity={1000}
                 slowCookEnabled={true}
                 showSettings={true}
@@ -24,10 +25,12 @@ describe('CraftingRecipeHeader', () => {
 
         expect(html).toContain('>Beer<');
         expect(html).toContain('>cooking<');
-        expect(html).toContain('Resultado base: 2.5 • Preço mercado: 12.345');
-        expect(html).toContain('Craft Qty');
+        expect(html).toContain('Resultado base: 2.5 por craft');
+        expect(html).toContain('Preço de referência: 12.345');
+        expect(html).toContain('Mercado');
+        expect(html).toContain('Quantidade');
         expect(html).toContain('value="1000"');
-        expect(html).toContain('Slow cook');
+        expect(html).toContain('Cozimento lento');
         expect(html).toContain('checked=""');
         expect(html).toContain('>Árvore<');
     });
@@ -41,6 +44,7 @@ describe('CraftingRecipeHeader', () => {
                 resultItemGrade={2}
                 resultItemIconUrl={null}
                 resultPrice={4500}
+                resultPriceSource="vendor"
                 craftQuantity={250}
                 slowCookEnabled={false}
                 showSettings={false}
@@ -53,8 +57,9 @@ describe('CraftingRecipeHeader', () => {
 
         expect(html).toContain('>Elixir<');
         expect(html).toContain('>alchemy<');
-        expect(html).toContain('Resultado base: 1 • Preço mercado: 4.500');
-        expect(html).toContain('>Settings<');
-        expect(html).not.toContain('Slow cook');
+        expect(html).toContain('Resultado base: 1 por craft');
+        expect(html).toContain('Vendor/NPC');
+        expect(html).toContain('>Configurações<');
+        expect(html).not.toContain('Cozimento lento');
     });
 });

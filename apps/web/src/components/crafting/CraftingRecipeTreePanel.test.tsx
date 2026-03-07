@@ -27,6 +27,9 @@ const materialNode: RecipeTreeNode = {
     children: [],
     leftover: [],
     ingredientAlternatives: {},
+    unitPrice: 150,
+    priceSource: 'vendor',
+    isTradeable: false,
 };
 
 describe('CraftingRecipeTreePanel', () => {
@@ -47,5 +50,7 @@ describe('CraftingRecipeTreePanel', () => {
         expect(html).toContain('Árvore da Receita');
         expect(html).toContain('>Sugar<');
         expect(html).toContain('42.50 un.');
+        expect(html).toContain('Vendor/NPC');
+        expect(html).toContain('Não comercializável');
     });
 });

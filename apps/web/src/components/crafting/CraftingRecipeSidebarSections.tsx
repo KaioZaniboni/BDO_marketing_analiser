@@ -12,8 +12,10 @@ import {
 import {
     formatRecipeTime,
     getGradeClass,
+    type PriceBreakdown,
     type RecipeTreeNode,
 } from '@/lib/crafting/calculator';
+import { resolveBdoIconUrl } from '@/lib/icon-url';
 import { useGlobalSettings } from '@/stores/global-settings-store';
 import {
     GlobalSettingsAlchemySection,
@@ -33,6 +35,29 @@ export interface TreeNodeViewProps {
     slowCookedIds: number[];
 }
 
+const PRICE_SOURCE_LABEL: Record<PriceBreakdown['source'], string> = {
+    market: 'Mercado',
+    custom: 'Manual',
+    vendor: 'Vendor/NPC',
+    missing: 'Sem preço',
+};
+
+function SourcePill({ source }: { source: PriceBreakdown['source'] }) {
+    const tone = source === 'market'
+        ? 'border-info/30 bg-info/10 text-info'
+        : source === 'custom'
+            ? 'border-gold/30 bg-gold/10 text-gold'
+            : source === 'vendor'
+                ? 'border-profit/30 bg-profit/10 text-profit'
+                : 'border-loss/30 bg-loss/10 text-loss';
+
+    return (
+        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${tone}`}>
+            {PRICE_SOURCE_LABEL[source]}
+        </span>
+    );
+}
+
 export function TreeNodeView({
     node,
     onToggleCollapse,
@@ -44,12 +69,39 @@ export function TreeNodeView({
     slowCookedIds,
 }: TreeNodeViewProps) {
     if (node.type === 'material') {
+        const iconUrl = resolveBdoIconUrl(node.iconUrl);
+
         return (
-            <div className="rounded-xl border border-border bg-bg-hover/20 px-3 py-2">
-                <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                        <p className="truncate font-medium text-primary">{node.name}</p>
-                        <p className="text-xs text-secondary">{node.requestedQuantity.toFixed(2)} un.</p>
+            <div className="rounded-xl border border-border bg-bg-hover/20 px-3 py-3">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
+                        {iconUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={iconUrl} alt={node.name} className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
+                        ) : (
+                            <div className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
+                        )}
+
+                        <div className="min-w-0">
+                            <p className="truncate font-medium text-primary">{node.name}</p>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                                {node.priceSource ? <SourcePill source={node.priceSource} /> : null}
+                                {node.isTradeable === false ? (
+                                    <span className="rounded-full border border-border bg-bg-primary px-2 py-0.5 text-[11px] font-medium text-secondary">
+                                        Não comercializável
+                                    </span>
+                                ) : null}
+                            </div>
+                            <p className="mt-2 text-xs text-secondary">
+                                {node.requestedQuantity.toFixed(2)} un. • Preço un.: {(node.unitPrice ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                            </p>
+                            {node.priceSource === 'missing' ? (
+                                <p className="mt-1 text-xs text-loss">Sem preço conhecido. Ajuste manualmente se necessário.</p>
+                            ) : null}
+                            {node.priceSource === 'vendor' ? (
+                                <p className="mt-1 text-xs text-profit">Tratado como compra de vendor/NPC.</p>
+                            ) : null}
+                        </div>
                     </div>
                     <span className="font-mono text-sm text-loss">
                         {node.craftingCost.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
@@ -89,8 +141,8 @@ export function TreeNodeView({
                                 {node.craftingType}
                             </span>
                         </div>
-                        <p className="text-xs text-secondary mt-1">
-                            Crafts: {node.craftQuantity.toFixed(1)} • Output: {node.normalProcQuantity.toFixed(1)}
+                        <p className="mt-1 text-xs text-secondary">
+                            Crafts: {node.craftQuantity.toFixed(1)} • Saída esperada: {node.normalProcQuantity.toFixed(1)}
                             {node.rareProcQuantity > 0 ? ` + ${node.rareProcQuantity.toFixed(1)}` : ''}
                         </p>
                     </div>
@@ -119,7 +171,7 @@ export function TreeNodeView({
                             onChange={() => onToggleRareProc(node.recipeId!)}
                             className="size-4 accent-[var(--color-gold)]"
                         />
-                        Usar rare proc
+                        Usar proc raro
                     </label>
                 )}
 
@@ -131,7 +183,7 @@ export function TreeNodeView({
                             onChange={() => onToggleSlowCook(node.recipeId!)}
                             className="size-4 accent-[var(--color-gold)]"
                         />
-                        Slow cook
+                        Cozimento lento
                     </label>
                 )}
             </div>
@@ -144,9 +196,10 @@ export function TreeNodeView({
                         }
 
                         const child = node.children[index];
+                        const selectedAlternative = alternatives.find((alternative) => alternative.itemId === child?.itemId) ?? alternatives[0];
                         return (
                             <label key={`${node.recipeId}-${slotKey}`} className="flex flex-col gap-1 text-xs text-secondary">
-                                Material alternativo
+                                Escolha do material
                                 <select
                                     value={child?.itemId ?? alternatives[0].itemId}
                                     onChange={(event) => onSelectMaterial(node.recipeId!, Number(slotKey), Number(event.target.value))}
@@ -154,10 +207,17 @@ export function TreeNodeView({
                                 >
                                     {alternatives.map((alternative) => (
                                         <option key={alternative.itemId} value={alternative.itemId}>
-                                            {alternative.quantity}x {alternative.item.name}
+                                            {alternative.quantity}x {alternative.item.name} · {alternative.subRecipeId ? `sub-receita ${alternative.subRecipeType}` : 'compra direta'}
                                         </option>
                                     ))}
                                 </select>
+                                <span>
+                                    Alternativas inferidas das variantes cadastradas desta receita. Seleção atual:{' '}
+                                    <span className="font-medium text-primary">{selectedAlternative.item.name}</span>
+                                    {selectedAlternative.subRecipeId
+                                        ? ` com sub-receita ${selectedAlternative.subRecipeType}`
+                                        : ' sem sub-receita conhecida'}.
+                                </span>
                             </label>
                         );
                     })}
