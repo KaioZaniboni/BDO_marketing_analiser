@@ -15,6 +15,12 @@ import {
     type RecipeTreeNode,
 } from '@/lib/crafting/calculator';
 import { useGlobalSettings } from '@/stores/global-settings-store';
+import {
+    GlobalSettingsAlchemySection,
+    GlobalSettingsCookingSection,
+    GlobalSettingsInventorySection,
+    GlobalSettingsMarketSection,
+} from '@/components/settings/GlobalSettingsSections';
 
 export interface TreeNodeViewProps {
     node: RecipeTreeNode;
@@ -182,151 +188,22 @@ export function SettingsPanel({ type }: { type: 'cooking' | 'alchemy' }) {
 
     return (
         <div className="space-y-4 rounded-2xl border border-border bg-bg-hover/10 p-4">
-            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
-                <Settings2 size={16} className="text-gold" />
-                Configurações
-            </h3>
+            <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
+                    <Settings2 size={16} className="text-gold" />
+                    Configurações
+                </h3>
+                <Link href="/settings" className="text-xs text-gold hover:underline">
+                    Abrir página completa
+                </Link>
+            </div>
 
             <div className="grid gap-3">
-                <label className="flex items-center justify-between rounded-xl border border-border bg-bg-primary px-3 py-2 text-sm text-primary">
-                    <span>Value Pack</span>
-                    <input
-                        type="checkbox"
-                        checked={settings.hasValuePack}
-                        onChange={(event) => settings.setValuePack(event.target.checked)}
-                        className="size-4 accent-[var(--color-gold)]"
-                    />
-                </label>
-
-                <label className="flex items-center justify-between rounded-xl border border-border bg-bg-primary px-3 py-2 text-sm text-primary">
-                    <span>Merchant Ring</span>
-                    <input
-                        type="checkbox"
-                        checked={settings.hasMerchantRing}
-                        onChange={(event) => settings.setMerchantRing(event.target.checked)}
-                        className="size-4 accent-[var(--color-gold)]"
-                    />
-                </label>
-
-                <label className="flex flex-col gap-1 text-xs text-secondary">
-                    Bônus de fama
-                    <input
-                        type="number"
-                        step="0.001"
-                        value={settings.familyFameBonus}
-                        onChange={(event) => settings.setFamilyFameBonus(Number(event.target.value))}
-                        className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                    />
-                </label>
-
-                {type === 'cooking' ? (
-                    <>
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Mastery fast cook
-                            <input
-                                type="number"
-                                value={settings.speedCookingMastery}
-                                onChange={(event) => settings.setSpeedCookingMastery(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Tempo fast cook
-                            <input
-                                type="number"
-                                step="0.1"
-                                value={settings.speedCookingTime}
-                                onChange={(event) => settings.setSpeedCookingTime(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Mastery slow cook
-                            <input
-                                type="number"
-                                value={settings.slowCookingMastery}
-                                onChange={(event) => settings.setSlowCookingMastery(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Tempo slow cook
-                            <input
-                                type="number"
-                                step="0.1"
-                                value={settings.slowCookingTime}
-                                onChange={(event) => settings.setSlowCookingTime(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Byproduct cooking
-                            <input
-                                type="number"
-                                value={settings.cookingByproductUsage}
-                                onChange={(event) => settings.setCookingByproductUsage(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-                    </>
-                ) : (
-                    <>
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Mastery alchemy
-                            <input
-                                type="number"
-                                value={settings.alchemyMastery}
-                                onChange={(event) => settings.setAlchemyMastery(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Tempo alchemy
-                            <input
-                                type="number"
-                                step="0.1"
-                                value={settings.alchemyTimeSeconds}
-                                onChange={(event) => settings.setAlchemyTimeSeconds(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-xs text-secondary">
-                            Byproduct alchemy
-                            <input
-                                type="number"
-                                value={settings.alchemyByproductUsage}
-                                onChange={(event) => settings.setAlchemyByproductUsage(Number(event.target.value))}
-                                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                            />
-                        </label>
-                    </>
-                )}
-
-                <label className="flex flex-col gap-1 text-xs text-secondary">
-                    Peso total
-                    <input
-                        type="number"
-                        value={settings.weight}
-                        onChange={(event) => settings.setWeight(Number(event.target.value))}
-                        className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                    />
-                </label>
-
-                <label className="flex flex-col gap-1 text-xs text-secondary">
-                    Peso usado
-                    <input
-                        type="number"
-                        value={settings.usedWeight}
-                        onChange={(event) => settings.setUsedWeight(Number(event.target.value))}
-                        className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                    />
-                </label>
+                <GlobalSettingsMarketSection settings={settings} compact />
+                {type === 'cooking'
+                    ? <GlobalSettingsCookingSection settings={settings} compact />
+                    : <GlobalSettingsAlchemySection settings={settings} compact />}
+                <GlobalSettingsInventorySection settings={settings} compact />
             </div>
         </div>
     );

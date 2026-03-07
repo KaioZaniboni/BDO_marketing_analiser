@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { DEFAULT_CRAFTING_SETTINGS } from '@/lib/crafting/constants';
 
-export interface GlobalSettings {
+export interface GlobalSettingsValues {
     hasValuePack: boolean;
     hasMerchantRing: boolean;
     familyFame: number;
@@ -23,6 +23,9 @@ export interface GlobalSettings {
     alchemyByproductUsage: number;
     weight: number;
     usedWeight: number;
+}
+
+export interface GlobalSettingsActions {
     setValuePack: (value: boolean) => void;
     setMerchantRing: (value: boolean) => void;
     setFamilyFame: (value: number) => void;
@@ -41,32 +44,41 @@ export interface GlobalSettings {
     setAlchemyByproductUsage: (value: number) => void;
     setWeight: (value: number) => void;
     setUsedWeight: (value: number) => void;
+    reset: () => void;
 }
 
-const toFamilyFameBonus = (value: number): number => Math.min(Math.max(value, 0) / 400_000, 0.005);
-const toFamilyFame = (value: number): number => Math.round(Math.max(value, 0) * 400_000);
+export interface GlobalSettings extends GlobalSettingsValues, GlobalSettingsActions {}
+
+export const toFamilyFameBonus = (value: number): number => Math.min(Math.max(value, 0) / 400_000, 0.005);
+export const toFamilyFame = (value: number): number => Math.round(Math.max(value, 0) * 400_000);
+
+export function getDefaultGlobalSettingsState(): GlobalSettingsValues {
+    return {
+        hasValuePack: DEFAULT_CRAFTING_SETTINGS.valuePackActive,
+        hasMerchantRing: DEFAULT_CRAFTING_SETTINGS.merchantRingActive,
+        familyFame: toFamilyFame(DEFAULT_CRAFTING_SETTINGS.familyFameBonus),
+        familyFameBonus: DEFAULT_CRAFTING_SETTINGS.familyFameBonus,
+        cookingMastery: DEFAULT_CRAFTING_SETTINGS.speedCookingMastery,
+        speedCookingMastery: DEFAULT_CRAFTING_SETTINGS.speedCookingMastery,
+        slowCookingMastery: DEFAULT_CRAFTING_SETTINGS.slowCookingMastery,
+        alchemyMastery: DEFAULT_CRAFTING_SETTINGS.alchemyMastery,
+        processingMastery: 0,
+        gatheringMastery: 0,
+        cookTimeSeconds: DEFAULT_CRAFTING_SETTINGS.speedCookingTime,
+        speedCookingTime: DEFAULT_CRAFTING_SETTINGS.speedCookingTime,
+        slowCookingTime: DEFAULT_CRAFTING_SETTINGS.slowCookingTime,
+        alchemyTimeSeconds: DEFAULT_CRAFTING_SETTINGS.alchemyTime,
+        cookingByproductUsage: DEFAULT_CRAFTING_SETTINGS.cookingByproductUsage,
+        alchemyByproductUsage: DEFAULT_CRAFTING_SETTINGS.alchemyByproductUsage,
+        weight: DEFAULT_CRAFTING_SETTINGS.weight,
+        usedWeight: DEFAULT_CRAFTING_SETTINGS.usedWeight,
+    };
+}
 
 export const useGlobalSettings = create<GlobalSettings>()(
     persist(
         (set) => ({
-            hasValuePack: DEFAULT_CRAFTING_SETTINGS.valuePackActive,
-            hasMerchantRing: DEFAULT_CRAFTING_SETTINGS.merchantRingActive,
-            familyFame: toFamilyFame(DEFAULT_CRAFTING_SETTINGS.familyFameBonus),
-            familyFameBonus: DEFAULT_CRAFTING_SETTINGS.familyFameBonus,
-            cookingMastery: DEFAULT_CRAFTING_SETTINGS.speedCookingMastery,
-            speedCookingMastery: DEFAULT_CRAFTING_SETTINGS.speedCookingMastery,
-            slowCookingMastery: DEFAULT_CRAFTING_SETTINGS.slowCookingMastery,
-            alchemyMastery: DEFAULT_CRAFTING_SETTINGS.alchemyMastery,
-            processingMastery: 0,
-            gatheringMastery: 0,
-            cookTimeSeconds: DEFAULT_CRAFTING_SETTINGS.speedCookingTime,
-            speedCookingTime: DEFAULT_CRAFTING_SETTINGS.speedCookingTime,
-            slowCookingTime: DEFAULT_CRAFTING_SETTINGS.slowCookingTime,
-            alchemyTimeSeconds: DEFAULT_CRAFTING_SETTINGS.alchemyTime,
-            cookingByproductUsage: DEFAULT_CRAFTING_SETTINGS.cookingByproductUsage,
-            alchemyByproductUsage: DEFAULT_CRAFTING_SETTINGS.alchemyByproductUsage,
-            weight: DEFAULT_CRAFTING_SETTINGS.weight,
-            usedWeight: DEFAULT_CRAFTING_SETTINGS.usedWeight,
+            ...getDefaultGlobalSettingsState(),
             setValuePack: (value) => set({ hasValuePack: value }),
             setMerchantRing: (value) => set({ hasMerchantRing: value }),
             setFamilyFame: (value) => set({
@@ -103,6 +115,7 @@ export const useGlobalSettings = create<GlobalSettings>()(
             setAlchemyByproductUsage: (value) => set({ alchemyByproductUsage: Math.max(value, 0) }),
             setWeight: (value) => set({ weight: Math.max(value, 0) }),
             setUsedWeight: (value) => set({ usedWeight: Math.max(value, 0) }),
+            reset: () => set(() => getDefaultGlobalSettingsState()),
         }),
         {
             name: 'bdo-global-settings',
