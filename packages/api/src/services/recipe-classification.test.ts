@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { getRecipeVariantKey } from './recipe-identity';
 import {
     filterRecipesByTypes,
     normalizeRecipeType,
@@ -25,5 +26,13 @@ describe('recipe classification', () => {
 
         expect(filterRecipesByTypes(contaminatedRecipes, ['cooking']).map((recipe) => recipe.id)).toEqual([580]);
         expect(filterRecipesByTypes(contaminatedRecipes, ['alchemy']).map((recipe) => recipe.id)).toEqual([347]);
+    });
+
+    it('builds a stable variant key in the shared pure helper', () => {
+        expect(getRecipeVariantKey({
+            type: 'cooking',
+            resultItemId: 9066,
+            name: 'Vinagre',
+        })).toBe('cooking:9066:vinagre');
     });
 });

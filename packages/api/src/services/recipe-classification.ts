@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { compareRecipesByTypeNameId, getRecipeVariantKey } from './recipe-identity';
+
 export const SUPPORTED_RECIPE_TYPES = ['cooking', 'alchemy', 'processing'] as const;
 
 export type SupportedRecipeType = (typeof SUPPORTED_RECIPE_TYPES)[number];
@@ -8,13 +10,6 @@ export type SupportedRecipeType = (typeof SUPPORTED_RECIPE_TYPES)[number];
 interface CanonicalRecipeRecord {
     id: number;
     main_category?: string | null;
-}
-
-interface RecipeWithType {
-    id: number;
-    type: string;
-    name: string;
-    resultItemId: number;
 }
 
 let canonicalTypeMap: Map<number, SupportedRecipeType> | null = null;
@@ -80,15 +75,4 @@ export function filterRecipesByTypes<T extends { id: number; type: string }>(
     return normalizedRecipes.filter((recipe) => allowedTypes.has(recipe.type as SupportedRecipeType));
 }
 
-export function getRecipeVariantKey(recipe: RecipeWithType): string {
-    return `${recipe.type}:${recipe.resultItemId}:${recipe.name.toLowerCase()}`;
-}
-
-export function compareRecipesByTypeNameId(
-    left: { id: number; type: string; name: string },
-    right: { id: number; type: string; name: string },
-): number {
-    return left.type.localeCompare(right.type)
-        || left.name.localeCompare(right.name)
-        || left.id - right.id;
-}
+export { compareRecipesByTypeNameId, getRecipeVariantKey };

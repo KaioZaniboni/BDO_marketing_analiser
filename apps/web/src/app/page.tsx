@@ -1,6 +1,7 @@
 'use client';
 
 import { Trophy, TrendingUp, Package, Flame } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { trpc } from '@/lib/trpc';
 import Link from 'next/link';
 
@@ -8,8 +9,13 @@ import Link from 'next/link';
  * Dashboard — Página principal do BDO Market Analyzer.
  */
 export default function DashboardPage() {
+  const { status } = useSession();
+  const hasSession = status === 'authenticated';
   const { data: ranking, isLoading: isRankingLoading } = trpc.recipe.getRanking.useQuery({ limit: 5 });
-  const { data: summaryData } = trpc.inventory.summary.useQuery();
+  const { data: summaryData } = trpc.inventory.summary.useQuery(undefined, {
+    enabled: hasSession,
+    retry: false,
+  });
   const { data: hotList } = trpc.market.getHotList.useQuery();
 
   const bestRecipe = ranking?.[0];
@@ -56,11 +62,22 @@ export default function DashboardPage() {
             <span className="kpi-label">Valor do Inventário</span>
           </div>
           <div className="kpi-value" style={{ color: 'var(--color-info)' }}>
-            {summaryData ? `${(summaryData.totalValue / 1000000).toFixed(1)}M` : '0'}
+            {hasSession && summaryData ? `${(summaryData.totalValue / 1000000).toFixed(1)}M` : '—'}
           </div>
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-            Silver Estimado
-          </span>
+          {hasSession ? (
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              Silver estimado
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+              Faça login para carregar seu inventário
+            </span>
+          )}
+          {!hasSession && (
+            <Link href="/login?callbackUrl=%2F" className="mt-2 inline-block text-xs font-semibold text-gold hover:underline">
+              Entrar agora
+            </Link>
+          )}
         </div>
 
         <div className="card kpi-card">

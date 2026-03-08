@@ -1,21 +1,19 @@
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '../trpc';
+import { calculateNetMultiplier } from '../services/calculator';
 import {
-    calculateNetMultiplier,
-    matchInventory,
-    analyzeProfitability,
-    rankRecipes,
-} from '../services/calculator';
-import { IMPERIAL_TIERS, getImperialBonus, IMPERIAL_RECIPES_MAPPING } from '../services/imperial-data';
+    analyzeCanonicalRecipeProfitability,
+    buildCanonicalImperialRanking,
+    buildCanonicalRanking,
+} from '../services/canonical-recipe-analytics';
 import {
-    compareRecipesByTypeNameId,
-    filterRecipesByTypes,
-    getRecipeVariantKey,
-    normalizeRecipeType,
-    type SupportedRecipeType,
-} from '../services/recipe-classification';
-import { getMultipleItemPrices } from '../services/market';
-import type { MarketItem, RankingWeights } from '../types';
+    catalogCanonicalRecipes,
+    getCanonicalRecipeDetail,
+    isCanonicalRecipesUnavailableError,
+    listCanonicalRecipes,
+} from '../services/canonical-recipe-reader';
+import type { RankingWeights } from '../types';
 
 const taxConfigSchema = z.object({
     baseTaxRate: z.number().min(0).max(1).default(0.35),
@@ -36,42 +34,18 @@ const imperialListSchema = z.object({
     taxConfig: taxConfigSchema.optional(),
 });
 
-function getSnapshotPrice(
-    snapshot: {
-        basePrice: bigint;
-        lastSoldPrice: bigint | null;
-    } | null | undefined,
-): number {
-    if (!snapshot) {
-        return 0;
+async function withCanonicalRead<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+        return await operation();
+    } catch (error) {
+        if (isCanonicalRecipesUnavailableError(error)) {
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: error.message,
+            });
+        }
+        throw error;
     }
-
-    return Number(snapshot.lastSoldPrice ?? snapshot.basePrice);
-}
-
-function toMarketItem(
-    itemId: number,
-    snapshot: {
-        basePrice: bigint;
-        lastSoldPrice: bigint | null;
-        currentStock: number;
-        totalTrades: bigint;
-        priceMin: bigint | null;
-        priceMax: bigint | null;
-    } | null | undefined,
-): MarketItem {
-    return {
-        id: itemId,
-        minEnhance: 0,
-        maxEnhance: 0,
-        basePrice: Number(snapshot?.basePrice ?? 0),
-        currentStock: snapshot?.currentStock ?? 0,
-        totalTrades: Number(snapshot?.totalTrades ?? 0),
-        priceMin: Number(snapshot?.priceMin ?? 0),
-        priceMax: Number(snapshot?.priceMax ?? 0),
-        lastSoldPrice: getSnapshotPrice(snapshot),
-        lastSoldTime: 0,
-    };
 }
 
 export const recipeRouter = router({
@@ -83,48 +57,7 @@ export const recipeRouter = router({
             offset: z.number().int().min(0).default(0),
             search: z.string().optional(),
         }))
-        .query(async ({ ctx, input }) => {
-            const where: Record<string, unknown> = {};
-            if (input.search) {
-                where.name = { contains: input.search, mode: 'insensitive' };
-            }
-
-            const rawRecipes = await ctx.prisma.recipe.findMany({
-                where,
-                include: {
-                    resultItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                    },
-                    ingredients: {
-                        include: {
-                            item: {
-                                include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                            },
-                        },
-                        orderBy: { sortOrder: 'asc' },
-                    },
-                },
-                orderBy: { name: 'asc' },
-            });
-
-            const filteredRecipes = filterRecipesByTypes(
-                rawRecipes,
-                input.type ? [input.type as SupportedRecipeType] : undefined,
-            );
-
-            const uniqueMap = new Map();
-            for (const recipe of filteredRecipes) {
-                const key = getRecipeVariantKey(recipe);
-                if (!uniqueMap.has(key)) {
-                    uniqueMap.set(key, recipe);
-                }
-            }
-
-            const uniqueList = Array.from(uniqueMap.values()).sort(compareRecipesByTypeNameId);
-
-            // Aplica pagina????o em mem??ria ap?? agrupar (j?? que estamos bypassando o Prisma distinct)
-            return uniqueList.slice(input.offset, input.offset + input.limit);
-        }),
+        .query(({ ctx, input }) => withCanonicalRead(() => listCanonicalRecipes(ctx.prisma, input))),
 
     /** Catálogo completo de receitas para calculadoras client-side */
     catalog: publicProcedure
@@ -132,299 +65,34 @@ export const recipeRouter = router({
             types: z.array(z.enum(['cooking', 'alchemy', 'processing'])).min(1).optional(),
             historyDays: z.number().int().min(1).max(60).default(28),
         }))
-        .query(async ({ ctx, input }) => {
-            const rawRecipes = await ctx.prisma.recipe.findMany({
-                include: {
-                    resultItem: {
-                        include: {
-                            prices: { where: { enhancementLevel: 0 }, take: 1 },
-                            priceHistory: {
-                                take: input.historyDays,
-                                orderBy: { recordedDate: 'desc' },
-                            },
-                        },
-                    },
-                    procItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                    },
-                    ingredients: {
-                        include: {
-                            item: {
-                                include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                            },
-                        },
-                        orderBy: { sortOrder: 'asc' },
-                    },
-                },
-                orderBy: [
-                    { type: 'asc' },
-                    { name: 'asc' },
-                    { id: 'asc' },
-                ],
-            });
-
-            return filterRecipesByTypes(rawRecipes, input.types).sort(compareRecipesByTypeNameId);
-        }),
+        .query(({ ctx, input }) => withCanonicalRead(() => catalogCanonicalRecipes(ctx.prisma, input))),
 
     /** Detalhes de uma receita por ID */
     getById: publicProcedure
         .input(z.object({ recipeId: z.number().int().positive() }))
-        .query(async ({ ctx, input }) => {
-            const recipe = await ctx.prisma.recipe.findUnique({
-                where: { id: input.recipeId },
-                include: {
-                    resultItem: {
-                        include: {
-                            prices: { where: { enhancementLevel: 0 }, take: 1 },
-                            priceHistory: {
-                                where: { enhancementLevel: 0 },
-                                take: 28,
-                                orderBy: { recordedDate: 'desc' },
-                            },
-                        },
-                    },
-                    procItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                    },
-                    ingredients: {
-                        include: {
-                            item: {
-                                include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                            },
-                        },
-                        orderBy: { sortOrder: 'asc' },
-                    },
-                },
-            });
-
-            if (!recipe) return null;
-
-            const normalizedRecipe = normalizeRecipeType(recipe);
-
-            // Busca todas as variantes com o mesmo nome e tipo para encontrar ingredientes alternativos
-            const rawVariants = await ctx.prisma.recipe.findMany({
-                where: { name: recipe.name, resultItemId: recipe.resultItemId },
-                include: {
-                    resultItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                    },
-                    procItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                    },
-                    ingredients: {
-                        include: {
-                            item: {
-                                include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                            },
-                        },
-                        orderBy: { sortOrder: 'asc' },
-                    },
-                },
-            });
-            const variants = filterRecipesByTypes(rawVariants, [normalizedRecipe.type as SupportedRecipeType]);
-
-            const collectedRecipes = new Map<number, (typeof variants)[number]>();
-            variants.forEach((variant) => {
-                collectedRecipes.set(variant.id, variant);
-            });
-
-            // Busca todas as sub-receitas referentes a todos os poss??veis ingredientes
-            const allIngItemIds = new Set<number>();
-            variants.forEach(v => v.ingredients.forEach(i => allIngItemIds.add(i.itemId)));
-
-            const rawSubRecipes = await ctx.prisma.recipe.findMany({
-                where: { resultItemId: { in: Array.from(allIngItemIds) } },
-                select: { id: true, resultItemId: true, type: true },
-            });
-            const subRecipes = filterRecipesByTypes(rawSubRecipes);
-            const subRecipeMap = new Map<number, { id: number, type: string }>();
-            subRecipes.forEach((sr: any) => { if (!subRecipeMap.has(sr.resultItemId)) subRecipeMap.set(sr.resultItemId, { id: sr.id, type: sr.type }); });
-
-            const pendingResultItemIds = new Set<number>(Array.from(allIngItemIds));
-            const visitedResultItemIds = new Set<number>();
-
-            while (pendingResultItemIds.size > 0) {
-                const batchItemIds = Array.from(pendingResultItemIds).filter((itemId) => !visitedResultItemIds.has(itemId));
-                pendingResultItemIds.clear();
-
-                if (batchItemIds.length === 0) {
-                    break;
-                }
-
-                batchItemIds.forEach((itemId) => visitedResultItemIds.add(itemId));
-
-                const rawRelatedRecipes = await ctx.prisma.recipe.findMany({
-                    where: { resultItemId: { in: batchItemIds } },
-                    include: {
-                        resultItem: {
-                            include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                        },
-                        procItem: {
-                            include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                        },
-                        ingredients: {
-                            include: {
-                                item: {
-                                    include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                                },
-                            },
-                            orderBy: { sortOrder: 'asc' },
-                        },
-                    },
-                });
-
-                const relatedRecipes = filterRecipesByTypes(rawRelatedRecipes);
-
-                for (const relatedRecipe of relatedRecipes) {
-                    collectedRecipes.set(relatedRecipe.id, relatedRecipe);
-
-                    relatedRecipe.ingredients.forEach((ingredient) => {
-                        if (!visitedResultItemIds.has(ingredient.itemId)) {
-                            pendingResultItemIds.add(ingredient.itemId);
-                        }
-                    });
-                }
+        .query(async ({ ctx, input }) => withCanonicalRead(async () => {
+            const canonicalDetail = await getCanonicalRecipeDetail(ctx.prisma, input.recipeId);
+            if (!canonicalDetail) {
+                return null;
             }
 
-            // Build co-occurrence matrix to find valid slots
-            const coOccurs = new Set<string>();
-            const allItemsMap = new Map<number, any>();
-
-            variants.forEach(v => {
-                v.ingredients.forEach(i => {
-                    const subRecipeInfo = subRecipeMap.get(i.itemId);
-                    const mapped = {
-                        ...i,
-                        subRecipeId: subRecipeInfo ? subRecipeInfo.id : null,
-                        subRecipeType: subRecipeInfo ? subRecipeInfo.type : null
-                    };
-                    allItemsMap.set(i.itemId, mapped);
-                    v.ingredients.forEach(j => {
-                        if (i.itemId !== j.itemId) {
-                            coOccurs.add(`${i.itemId}-${j.itemId}`);
-                        }
-                    });
-                });
-            });
-
-            type Ingredient = typeof recipe.ingredients[0] & { subRecipeId: number | null, subRecipeType: string | null };
-            const ingredientAlternatives: Record<number, Ingredient[]> = {};
-
-            recipe.ingredients.forEach((baseIng, idx) => {
-                ingredientAlternatives[idx] = [];
-                const baseId = baseIng.itemId;
-
-                for (const [itemId, variantIng] of allItemsMap.entries()) {
-                    // It belongs to the current slot if it NEVER co-occurs with the base ingredient of this slot
-                    // (Or if it IS the exact base ingredient)
-                    if (itemId === baseId || !coOccurs.has(`${baseId}-${itemId}`)) {
-                        ingredientAlternatives[idx].push(variantIng as unknown as Ingredient);
-                    }
-                }
-
-                // Sort by default base first, then by item id so dropdown is stable
-                ingredientAlternatives[idx].sort((a, b) => {
-                    if (a.itemId === baseId) return -1;
-                    if (b.itemId === baseId) return 1;
-                    return a.itemId - b.itemId;
-                });
-            });
-
             return {
-                ...normalizedRecipe,
-                ingredientAlternatives,
-                treeRecipes: Array.from(collectedRecipes.values()).sort(compareRecipesByTypeNameId),
+                ...canonicalDetail.recipe,
+                ingredientAlternatives: canonicalDetail.ingredientAlternatives,
+                treeRecipes: canonicalDetail.treeRecipes,
             };
-        }),
+        })),
 
     /** Retorna as caixas imperiais suportadas com cálculo otimizado (BDOLytics Clone) */
     getImperialRanking: publicProcedure
         .input(imperialListSchema)
-        .query(async ({ ctx, input }) => {
-            // Filtrar recipes que são compatíveis com caixas imperiais
-            const validIds = Object.keys(IMPERIAL_RECIPES_MAPPING).map(Number);
-            const rawRecipes = await ctx.prisma.recipe.findMany({
-                where: {
-                    resultItemId: { in: validIds },
-                },
-                include: {
-                    resultItem: {
-                        include: {
-                            prices: { where: { enhancementLevel: 0 }, take: 1 },
-                            priceHistory: {
-                                where: { enhancementLevel: 0 },
-                                take: 1,
-                                orderBy: { recordedDate: 'desc' },
-                            },
-                        },
-                    },
-                    ingredients: {
-                        include: {
-                            item: { include: { prices: { where: { enhancementLevel: 0 }, take: 1 } } }
-                        }
-                    }
-                }
+        .query(({ ctx, input }) => withCanonicalRead(async () => {
+            const recipes = await catalogCanonicalRecipes(ctx.prisma, {
+                types: input.type ? [input.type] : ['cooking', 'alchemy'],
+                historyDays: 1,
             });
-            const recipes = filterRecipesByTypes(
-                rawRecipes,
-                input.type ? [input.type as SupportedRecipeType] : undefined,
-            );
-
-            // Agrupa variante de menor custo
-            const uniqueMap = new Map();
-            for (const r of recipes) {
-                const cost = r.ingredients.reduce((acc: number, ing: any) => {
-                    const ingPrice = Number(ing.item?.prices?.[0]?.lastSoldPrice ?? ing.item?.prices?.[0]?.basePrice ?? 0);
-                    return acc + (ing.quantity * ingPrice);
-                }, 0);
-
-                if (!uniqueMap.has(r.name)) {
-                    uniqueMap.set(r.name, { ...r, cost });
-                } else {
-                    // Escolhe a variação mais barata para craftar a caixa
-                    if (cost < uniqueMap.get(r.name).cost) {
-                        uniqueMap.set(r.name, { ...r, cost });
-                    }
-                }
-            }
-
-            const uniqueRecipes = Array.from(uniqueMap.values());
-            const taxMultiplier = calculateNetMultiplier(input.taxConfig || { baseTaxRate: 0.35, hasValuePack: true, hasMerchantRing: false, familyFame: 0 });
-
-            const out = uniqueRecipes.map(r => {
-                const boxInfo = IMPERIAL_RECIPES_MAPPING[r.resultItemId];
-                const baseItemPrice = Number(r.resultItem?.prices?.[0]?.lastSoldPrice ?? r.resultItem?.prices?.[0]?.basePrice ?? 0);
-                const dailyVolume = Number(r.resultItem?.priceHistory?.[0]?.volume ?? 0);
-
-                // NPC Paga = (BasePrice * 2.5) + (BasePrice * 2.5 * MasteryBonus)
-                const masteryBonusPct = getImperialBonus(input.mastery) / 100;
-                const baseBoxNPCPrice = boxInfo.tier.basePrice * 2.5;
-                const imperialBoxPrice = baseBoxNPCPrice + (baseBoxNPCPrice * masteryBonusPct);
-
-                const costPerBox = r.cost * boxInfo.qtyRequired; // Custo do craft do número de itens que fecham 1 caixa
-                const profitPerBox = imperialBoxPrice - costPerBox;
-
-                // Revenue se vendesse solto no mercado para comparar (com VP/taxes applied)
-                const marketRevenuePerBox = (baseItemPrice * boxInfo.qtyRequired) * taxMultiplier;
-
-                return {
-                    id: r.id,
-                    name: r.name,
-                    resultItemId: r.resultItemId,
-                    baseItemPrice,
-                    boxInfo,
-                    costPerBox,
-                    imperialBoxPrice: Math.floor(imperialBoxPrice),
-                    profitPerBox: Math.floor(profitPerBox),
-                    marketRevenuePerBox: Math.floor(marketRevenuePerBox),
-                    dailyVolume
-                };
-            });
-
-            // Ordenar por maior lucro por caixa
-            out.sort((a, b) => b.profitPerBox - a.profitPerBox);
-            return out;
-        }),
+            return buildCanonicalImperialRanking(recipes, input);
+        })),
 
     /** Calcula taxa líquida do mercado */
     calculateTax: publicProcedure
@@ -445,65 +113,26 @@ export const recipeRouter = router({
             craftCount: z.number().int().min(1).max(10000).default(1),
             taxConfig: taxConfigSchema,
         }))
-        .query(async ({ ctx, input }) => {
-            // Buscar receita com ingredientes
-            const recipe = await ctx.prisma.recipe.findUnique({
-                where: { id: input.recipeId },
-                include: {
-                    resultItem: {
-                        include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                    },
-                    ingredients: { include: { item: true } },
-                },
-            });
+        .query(async ({ ctx, input }) => withCanonicalRead(async () => {
+            const recipeDetail = await getCanonicalRecipeDetail(ctx.prisma, input.recipeId);
+            if (!recipeDetail) {
+                throw new TRPCError({ code: 'NOT_FOUND', message: 'Receita canônica não encontrada.' });
+            }
 
-            if (!recipe) throw new Error('Receita não encontrada');
-
-            // Buscar inventário do usuário
             const inventory = await ctx.prisma.userInventory.findMany({
                 where: { userId: ctx.session.userId },
             });
             const userInventory = new Map<number, number>(
-                inventory.map((i: { itemId: number; quantity: number }) => [i.itemId, i.quantity] as [number, number]),
+                inventory.map((item) => [item.itemId, item.quantity] as [number, number]),
             );
 
-            // Buscar preços de mercado dos ingredientes
-            const ingredientIds = recipe.ingredients.map((i: { itemId: number }) => i.itemId);
-            const marketPrices = await getMultipleItemPrices(ingredientIds);
-            const priceMap = new Map<number, number>();
-            for (const [id, item] of marketPrices) {
-                priceMap.set(id, item.lastSoldPrice || item.basePrice);
-            }
-
-            // Match de inventário
-            const match = matchInventory(
-                recipe.id,
-                recipe.ingredients.map((i: { itemId: number; quantity: number }) => ({
-                    itemId: i.itemId,
-                    quantity: i.quantity,
-                })),
-                userInventory as Map<number, number>,
-                priceMap,
+            return analyzeCanonicalRecipeProfitability(
+                recipeDetail.recipe,
+                userInventory,
+                input.taxConfig,
                 input.craftCount,
             );
-
-            // Preço do resultado
-            const resultPrice = recipe.resultItem.prices[0]
-                ? Number(recipe.resultItem.prices[0].lastSoldPrice ?? recipe.resultItem.prices[0].basePrice)
-                : 0;
-
-            // Análise de lucratividade
-            const analysis = analyzeProfitability(
-                match,
-                recipe.name,
-                resultPrice,
-                recipe.resultQuantity * input.craftCount,
-                priceMap,
-                input.taxConfig,
-            );
-
-            return { match, analysis };
-        }),
+        })),
 
     /** Ranking global de receitas */
     getRanking: publicProcedure
@@ -512,134 +141,13 @@ export const recipeRouter = router({
             weights: rankingWeightsSchema.optional(),
             limit: z.number().int().min(1).max(100).default(50),
         }))
-        .query(async ({ ctx, input }) => {
-            const rawRecipes = await ctx.prisma.recipe.findMany({
-                include: {
-                    resultItem: {
-                        include: {
-                            prices: { where: { enhancementLevel: 0 }, take: 1 },
-                            priceHistory: {
-                                where: { enhancementLevel: 0 },
-                                take: 1,
-                                orderBy: { recordedDate: 'desc' },
-                            },
-                        },
-                    },
-                    ingredients: {
-                        include: {
-                            item: {
-                                include: { prices: { where: { enhancementLevel: 0 }, take: 1 } },
-                            },
-                        },
-                    },
-                },
+        .query(({ ctx, input }) => withCanonicalRead(async () => {
+            const recipes = await catalogCanonicalRecipes(ctx.prisma, {
+                types: input.type ? [input.type] : undefined,
+                historyDays: 1,
+                primaryOnly: true,
             });
 
-            const filteredRecipes = filterRecipesByTypes(
-                rawRecipes,
-                input.type ? [input.type as SupportedRecipeType] : undefined,
-            );
-
-            const uniqueMap = new Map();
-            for (const recipe of filteredRecipes) {
-                const key = getRecipeVariantKey(recipe);
-                if (!uniqueMap.has(key)) {
-                    uniqueMap.set(key, recipe);
-                }
-            }
-            const recipes = Array.from(uniqueMap.values())
-                .sort(compareRecipesByTypeNameId)
-                .slice(0, input.limit);
-
-            const marketData = new Map<number, MarketItem>(
-                recipes.map((recipe: {
-                    resultItemId: number;
-                    resultItem: {
-                        prices: Array<{
-                            basePrice: bigint;
-                            lastSoldPrice: bigint | null;
-                            currentStock: number;
-                            totalTrades: bigint;
-                            priceMin: bigint | null;
-                            priceMax: bigint | null;
-                        }>;
-                    };
-                }) => [
-                    recipe.resultItemId,
-                    toMarketItem(recipe.resultItemId, recipe.resultItem.prices[0]),
-                ]),
-            );
-
-            // Calcular análise simplificada (sem inventário de usuário)
-            const defaultTax = { baseTaxRate: 0.35, hasValuePack: true, hasMerchantRing: false, familyFame: 0 };
-            const emptyInventory = new Map<number, number>();
-
-            const priceMap = new Map<number, number>();
-
-            for (const recipe of recipes as Array<{
-                ingredients: Array<{
-                    itemId: number;
-                    item: {
-                        prices: Array<{
-                            basePrice: bigint;
-                            lastSoldPrice: bigint | null;
-                        }>;
-                    };
-                }>;
-            }>) {
-                for (const ingredient of recipe.ingredients) {
-                    if (!priceMap.has(ingredient.itemId)) {
-                        priceMap.set(ingredient.itemId, getSnapshotPrice(ingredient.item.prices[0]));
-                    }
-                }
-            }
-
-            const recipesForRanking = recipes.map((recipe: {
-                id: number;
-                name: string;
-                type: string;
-                resultItemId: number;
-                resultQuantity: number;
-                resultItem: {
-                    prices: Array<{ lastSoldPrice: bigint | null; basePrice: bigint }>;
-                    priceHistory: Array<{ volume: number }>;
-                };
-                ingredients: Array<{ itemId: number; quantity: number }>;
-            }) => {
-                const match = matchInventory(
-                    recipe.id,
-                    recipe.ingredients.map((i: { itemId: number; quantity: number }) => ({ itemId: i.itemId, quantity: i.quantity })),
-                    emptyInventory,
-                    priceMap,
-                );
-
-                const resultPrice = recipe.resultItem.prices[0]
-                    ? getSnapshotPrice(recipe.resultItem.prices[0])
-                    : 0;
-
-                const analysis = analyzeProfitability(
-                    match,
-                    recipe.name,
-                    resultPrice,
-                    recipe.resultQuantity,
-                    priceMap,
-                    defaultTax,
-                );
-
-                return {
-                    recipeId: recipe.id,
-                    recipeName: recipe.name,
-                    recipeType: recipe.type,
-                    resultItemId: recipe.resultItemId,
-                    dailyVolume: Number(recipe.resultItem.priceHistory[0]?.volume ?? 0),
-                    analysis,
-                };
-            });
-
-            return rankRecipes(
-                recipesForRanking,
-                marketData,
-                input.weights,
-            );
-        }),
+            return buildCanonicalRanking(recipes.slice(0, input.limit), input.weights);
+        })),
 });

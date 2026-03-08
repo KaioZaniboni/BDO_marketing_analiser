@@ -38,5 +38,8 @@ yarn-error.log*
 # Test
 coverage/
 
+# Temporary / local debugging artifacts
+tmp/
+
 # TypeScript
 *.tsbuildinfo

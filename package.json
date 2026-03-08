@@ -12,7 +12,10 @@
     "test": "turbo run test",
     "db:migrate": "npm run migrate --workspace=packages/db",
     "db:generate": "npm run generate --workspace=packages/db",
+    "db:catalog:refresh": "npm run catalog:refresh --workspace=packages/db",
+    "db:catalog:validate": "npm run catalog:validate --workspace=packages/db",
     "db:seed": "npm run seed --workspace=packages/db",
+    "db:bootstrap-admin": "npm run bootstrap:admin --workspace=packages/db",
     "db:studio": "npm run studio --workspace=packages/db"
   },
   "devDependencies": {

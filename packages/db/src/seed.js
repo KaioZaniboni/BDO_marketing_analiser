@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
+const { buildCanonicalCrafts, replaceAllMaterializedCanonicalCrafts } = require('./canonical-recipes');
 
 const itemsPath = path.join(__dirname, 'seed-data', 'items.json');
 const recipesPath = path.join(__dirname, 'seed-data', 'recipes.json');
@@ -123,6 +124,7 @@ async function main() {
                     resultQuantity: toPositiveNumberOrDefault(recipe.resultQuantity, 1.0),
                     procItemId: recipe.procItemId || null,
                     procQuantity: toNullablePositiveNumber(recipe.procQuantity),
+                    masteryBonusPct: Math.trunc(toNumberOrDefault(recipe.masteryBonusPct, 0)),
                     experience: Math.trunc(toNumberOrDefault(recipe.experience, 0)),
                     cookTimeSeconds: toNumberOrDefault(recipe.cookTimeSeconds, 0),
                     categoryId: recipe.categoryId ?? null,
@@ -155,6 +157,32 @@ async function main() {
             }
         }
         console.log(`Seed de ${rCount} Receitas concluido!`);
+
+        const itemNamesById = new Map(items.map((item) => [item.id, item.name]));
+        const dbCurations = await prisma.recipeCuration.findMany({
+            include: {
+                slots: { orderBy: { slotIndex: 'asc' } },
+            },
+        }).then((rows) => rows.map((row) => ({
+            canonicalKey: row.canonicalKey,
+            legacyRecipeIds: row.legacyRecipeIds,
+            primaryLegacyRecipeId: row.primaryLegacyRecipeId,
+            nameOverride: row.nameOverride,
+            notes: row.notes,
+            slots: row.slots.map((slot) => ({
+                index: slot.slotIndex,
+                slotKey: slot.slotKey,
+                label: slot.label,
+                defaultItemId: slot.defaultItemId,
+                defaultQuantity: slot.defaultQuantity,
+            })),
+        })));
+        const canonicalCrafts = buildCanonicalCrafts(normalizedRecipes, itemNamesById, { dbCurations });
+
+        console.log(`Materializando ${canonicalCrafts.length} crafts canônicos...`);
+        const createdCrafts = await replaceAllMaterializedCanonicalCrafts(prisma, canonicalCrafts);
+
+        console.log(`Seed canônico concluído com ${createdCrafts.length} crafts materializados.`);
     }
 }
 

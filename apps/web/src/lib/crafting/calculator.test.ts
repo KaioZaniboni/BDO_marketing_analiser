@@ -152,6 +152,76 @@ describe('crafting calculator', () => {
         expect(withContext).toEqual(withoutContext);
     });
 
+    it('respects alternatives by slot and selected material when building the tree', () => {
+        const settings = getDefaultCraftingSettings();
+        const flour = createItem(10, 'Flour', 100);
+        const potato = createItem(11, 'Potato Dough', 140);
+        const water = createItem(20, 'Mineral Water', 30);
+
+        const rootRecipe: CalculatorRecipe = {
+            id: 1,
+            name: 'Simple Dough',
+            type: 'cooking',
+            experience: 100,
+            cookTimeSeconds: 1,
+            resultItemId: 100,
+            resultQuantity: 1,
+            resultItem: createItem(100, 'Dough', 500),
+            procItem: null,
+            ingredients: [
+                { itemId: 10, quantity: 1, sortOrder: 0, item: flour },
+                { itemId: 20, quantity: 1, sortOrder: 1, item: water },
+            ],
+        };
+        const variantRecipe: CalculatorRecipe = {
+            ...rootRecipe,
+            id: 2,
+            ingredients: [
+                { itemId: 11, quantity: 1, sortOrder: 0, item: potato },
+                { itemId: 20, quantity: 1, sortOrder: 1, item: water },
+            ],
+        };
+        const subRecipe: CalculatorRecipe = {
+            id: 3,
+            name: 'Potato Dough',
+            type: 'processing',
+            experience: 0,
+            cookTimeSeconds: 1,
+            resultItemId: 11,
+            resultQuantity: 1,
+            resultItem: potato,
+            procItem: null,
+            ingredients: [
+                { itemId: 12, quantity: 2, sortOrder: 0, item: createItem(12, 'Potato', 50) },
+            ],
+        };
+
+        const state = {
+            ...getDefaultCalculatorState(),
+            selectedMaterials: {
+                1: {
+                    0: 11,
+                },
+            },
+        };
+
+        const tree = buildRecipeTree({
+            recipes: [rootRecipe, variantRecipe, subRecipe],
+            rootRecipeId: 1,
+            craftQuantity: 10,
+            settings,
+            state,
+        });
+
+        expect(tree).not.toBeNull();
+        expect(tree?.ingredientAlternatives[0]?.map((ingredient) => ingredient.itemId)).toEqual([10, 11]);
+        expect(tree?.children[0]).toMatchObject({
+            recipeId: 3,
+            itemId: 11,
+            craftingType: 'processing',
+        });
+    });
+
     it('computes weight capacity from flattened ingredient weight', () => {
         const summary = getWeightSummary(
             [

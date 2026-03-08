@@ -22,5 +22,37 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Re-exporta tipos do Prisma para uso nos outros packages
-export * from '@prisma/client';
+export { Prisma, Role } from '@prisma/client';
 export type { PrismaClient } from '@prisma/client';
+export { hashPassword, verifyPassword } from './auth';
+export * from './recipe-catalog';
+export {
+    buildFallbackCanonicalKey,
+    loadRecipeCurations,
+    buildCanonicalCrafts,
+    materializeCanonicalCraft,
+    createMaterializedCanonicalCraft,
+    replaceMaterializedCanonicalCraft,
+    replaceAllMaterializedCanonicalCrafts,
+} from './canonical-recipes.js';
+export type {
+    CanonicalRecipeIngredient,
+    CanonicalRecipeLike,
+    MaterializedCanonicalCraft,
+} from './canonical-recipes.js';
+export {
+    buildRecipeCurationDraft,
+    mergeRecipeCurations,
+    normalizeRecipeCurationDraft,
+    normalizeRecipeCurationRecord,
+    normalizeRecipeCurationSearchTerm,
+    normalizeRecipeCurationTypeFilter,
+    parseRecipeCurationDraft,
+    serializeRecipeCurationDraft,
+} from './recipe-curation.js';
+export type {
+    RecipeCurationDraft,
+    RecipeCurationRecord,
+    RecipeCurationSource,
+    RecipeCurationTypeFilter,
+} from './recipe-curation.js';

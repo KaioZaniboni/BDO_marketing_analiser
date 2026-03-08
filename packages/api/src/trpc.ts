@@ -1,6 +1,12 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
-import { type PrismaClient } from '@bdo/db';
+import { Role, type PrismaClient } from '@bdo/db';
+
+export interface SessionContextUser {
+    userId: number;
+    username: string;
+    role: Role;
+}
 
 /**
  * Contexto compartilhado entre todas as procedures do tRPC.
@@ -8,10 +14,7 @@ import { type PrismaClient } from '@bdo/db';
  */
 export interface Context {
     prisma: PrismaClient;
-    session: {
-        userId: number;
-        username: string;
-    } | null;
+    session: SessionContextUser | null;
 }
 
 const t = initTRPC.context<Context>().create({
@@ -41,4 +44,26 @@ const enforceAuth = middleware(async ({ ctx, next }) => {
     });
 });
 
+export function isAdminSession(session: Context['session']): session is SessionContextUser & { role: typeof Role.ADMIN } {
+    return session?.role === Role.ADMIN;
+}
+
+const enforceAdmin = middleware(async ({ ctx, next }) => {
+    if (!ctx.session) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+
+    if (!isAdminSession(ctx.session)) {
+        throw new TRPCError({ code: 'FORBIDDEN' });
+    }
+
+    return next({
+        ctx: {
+            ...ctx,
+            session: ctx.session,
+        },
+    });
+});
+
 export const protectedProcedure = t.procedure.use(enforceAuth);
+export const adminProcedure = protectedProcedure.use(enforceAdmin);

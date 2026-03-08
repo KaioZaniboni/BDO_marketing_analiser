@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import { TRPCProvider } from '@/lib/trpc';
+import { AppProviders } from '@/components/providers/AppProviders';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { PageTransition } from '@/components/layout/PageTransition';
+import { getServerAuthSession } from '@/server/auth';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,22 +25,24 @@ export const metadata: Metadata = {
   keywords: ['BDO', 'Black Desert Online', 'Market', 'Cooking', 'Alchemy', 'SA'],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerAuthSession();
+
   return (
     <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
-        <TRPCProvider>
+        <AppProviders session={session}>
           <Sidebar />
           <main className="main-content">
             <PageTransition>
               {children}
             </PageTransition>
           </main>
-        </TRPCProvider>
+        </AppProviders>
       </body>
     </html>
   );

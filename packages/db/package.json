@@ -8,7 +8,11 @@
         "generate": "prisma generate",
         "migrate": "prisma migrate dev",
         "migrate:prod": "prisma migrate deploy",
+        "catalog:refresh": "tsx src/scrape-recipes.ts",
+        "catalog:validate": "tsx src/validate-recipe-catalog.ts",
         "seed": "node src/seed.js",
+        "bootstrap:admin": "tsx src/bootstrap-admin.ts",
+        "test": "tsx src/recipe-catalog.test.ts",
         "studio": "prisma studio"
     },
     "dependencies": {

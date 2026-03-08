@@ -7,6 +7,8 @@ import {
     type AlchemyMasteryEntry,
     type CookingMasteryEntry,
 } from '@/lib/crafting/constants';
+import { buildIngredientAlternativesBySlot } from '@bdo/api/src/services/recipe-alternatives';
+import { getRecipeVariantKey } from '@bdo/api/src/services/recipe-identity';
 
 export type CraftingType = 'cooking' | 'alchemy' | 'processing';
 
@@ -415,7 +417,7 @@ export function getRecipeRates(
 }
 
 export function getRecipeGroupKey(recipe: CalculatorRecipe): string {
-    return `${recipe.type}:${recipe.resultItemId}:${recipe.name.toLowerCase()}`;
+    return getRecipeVariantKey(recipe);
 }
 
 export function groupRecipes(recipes: CalculatorRecipe[]): Map<string, CalculatorRecipe[]> {
@@ -466,49 +468,17 @@ function buildIngredientAlternatives(
     resultLookup: Map<number, CalculatorRecipe[]>,
 ): Record<number, IngredientAlternative[]> {
     const variants = groupedRecipes.get(getRecipeGroupKey(recipe)) ?? [recipe];
-    const coOccurs = new Set<string>();
-    const allItemsMap = new Map<number, IngredientAlternative>();
 
-    for (const variant of variants) {
-        for (const ingredient of variant.ingredients) {
-            const subRecipe = resultLookup.get(ingredient.itemId)?.[0];
-            allItemsMap.set(ingredient.itemId, {
-                ...ingredient,
-                subRecipeId: subRecipe?.id ?? null,
-                subRecipeType: subRecipe?.type ?? null,
-            });
-
-            for (const otherIngredient of variant.ingredients) {
-                if (ingredient.itemId !== otherIngredient.itemId) {
-                    coOccurs.add(`${ingredient.itemId}-${otherIngredient.itemId}`);
-                }
-            }
-        }
-    }
-
-    const alternatives: Record<number, IngredientAlternative[]> = {};
-
-    recipe.ingredients.forEach((ingredient, index) => {
-        alternatives[index] = [];
-
-        for (const [itemId, option] of allItemsMap.entries()) {
-            if (itemId === ingredient.itemId || !coOccurs.has(`${ingredient.itemId}-${itemId}`)) {
-                alternatives[index].push(option);
-            }
-        }
-
-        alternatives[index].sort((left, right) => {
-            if (left.itemId === ingredient.itemId) {
-                return -1;
-            }
-            if (right.itemId === ingredient.itemId) {
-                return 1;
-            }
-            return left.itemId - right.itemId;
-        });
-    });
-
-    return alternatives;
+    return buildIngredientAlternativesBySlot<CalculatorIngredient, CalculatorRecipe, CraftingType>(
+        recipe,
+        variants,
+        (itemId) => {
+            const subRecipe = resultLookup.get(itemId)?.[0];
+            return subRecipe
+                ? { id: subRecipe.id, type: subRecipe.type }
+                : null;
+        },
+    );
 }
 
 function aggregateFlatInputRows(rows: LeafInputRow[]): LeafInputRow[] {

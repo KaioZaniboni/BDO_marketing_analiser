@@ -3,68 +3,26 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { signOut, useSession } from 'next-auth/react';
 import {
-    LayoutDashboard,
-    ChefHat,
-    FlaskConical,
-    Hammer,
-    Pickaxe,
-    ShoppingCart,
-    Package,
-    Settings,
     Sword,
     ChevronDown,
-    Calculator,
-    Crown,
-    Sparkles,
-    MapPin,
+    LogIn,
+    LogOut,
+    Shield,
 } from 'lucide-react';
+import { getSidebarNavItems } from './sidebar-nav';
+import { isAdminRole } from '@/lib/auth/roles';
 
-interface NavItem {
-    href: string;
-    label: string;
-    icon: React.ElementType;
-    children?: { href: string; label: string }[];
+function buildLoginHref(pathname: string) {
+    return `/login?callbackUrl=${encodeURIComponent(pathname || '/')}`;
 }
-
-const navItems: NavItem[] = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-    {
-        href: '/cooking',
-        label: 'Culinária',
-        icon: ChefHat,
-        children: [
-            { href: '/cooking', label: 'Calculadora de Mercado' },
-            { href: '/cooking/imperial', label: 'Entrega Imperial' },
-            { href: '/cooking/xp', label: 'XP de Culinária' },
-            { href: '/cooking/cp', label: 'Pontos de Contribuição' },
-        ],
-    },
-    {
-        href: '/alchemy',
-        label: 'Alquimia',
-        icon: FlaskConical,
-        children: [
-            { href: '/alchemy', label: 'Calculadora de Mercado' },
-            { href: '/alchemy/imperial', label: 'Entrega Imperial' },
-            { href: '/alchemy/xp', label: 'XP de Alquimia' },
-        ],
-    },
-    {
-        href: '/processing',
-        label: 'Processamento',
-        icon: Hammer,
-        children: [
-            { href: '/processing', label: 'Calculadora de Mercado' },
-        ],
-    },
-    { href: '/market', label: 'Mercado', icon: ShoppingCart },
-    { href: '/inventory', label: 'Inventário', icon: Package },
-    { href: '/settings', label: 'Configurações', icon: Settings },
-];
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { data: session, status } = useSession();
+    const navItems = getSidebarNavItems(session?.user.role);
+    const loginHref = buildLoginHref(pathname);
     const [expandedSections, setExpandedSections] = useState<string[]>(() => {
         // Auto-expand a seção ativa na primeira renderização
         for (const item of navItems) {
@@ -195,9 +153,40 @@ export function Sidebar() {
                 borderTop: '1px solid var(--color-border)',
                 fontSize: '0.75rem',
                 color: 'var(--color-text-muted)',
-                textAlign: 'center',
             }}>
-                Servidor SA • v0.2.0
+                <div className="flex flex-col gap-3">
+                    <div>
+                        <p className="text-center">Servidor SA • v0.2.0</p>
+                        {status === 'authenticated' ? (
+                            <div className="mt-3 rounded-lg border border-border bg-bg-hover/30 px-3 py-2 text-left">
+                                <p className="font-semibold text-primary">{session.user.username}</p>
+                                <p className="mt-1 flex items-center gap-1 text-[11px] uppercase tracking-wide text-secondary">
+                                    <Shield size={12} /> {isAdminRole(session.user.role) ? 'Admin' : 'Usuário'}
+                                </p>
+                            </div>
+                        ) : (
+                            <p className="mt-3 text-center text-[11px] text-secondary">
+                                Faça login para habilitar inventário e rotas operacionais.
+                            </p>
+                        )}
+                    </div>
+
+                    {status === 'authenticated' ? (
+                        <button
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-bg-hover px-3 py-2 font-medium text-primary transition-colors hover:border-gold/40 hover:text-gold"
+                        >
+                            <LogOut size={15} /> Sair
+                        </button>
+                    ) : (
+                        <Link
+                            href={loginHref}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-bg-hover px-3 py-2 font-medium text-primary transition-colors hover:border-gold/40 hover:text-gold"
+                        >
+                            <LogIn size={15} /> Entrar
+                        </Link>
+                    )}
+                </div>
             </div>
         </aside>
     );

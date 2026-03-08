@@ -1,16 +1,26 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { trpc } from '@/lib/trpc';
 import { Package, Plus, Trash2, Import } from 'lucide-react';
 
 export default function InventoryPage() {
     const [itemId, setItemId] = useState('');
     const [quantity, setQuantity] = useState('');
+    const { data: session, status } = useSession();
+    const hasSession = status === 'authenticated';
 
     const utils = trpc.useUtils();
-    const { data: inventory, isLoading } = trpc.inventory.list.useQuery();
-    const { data: summaryData } = trpc.inventory.summary.useQuery();
+    const { data: inventory, isLoading } = trpc.inventory.list.useQuery(undefined, {
+        enabled: hasSession,
+        retry: false,
+    });
+    const { data: summaryData } = trpc.inventory.summary.useQuery(undefined, {
+        enabled: hasSession,
+        retry: false,
+    });
 
     const addMutation = trpc.inventory.upsert.useMutation({
         onSuccess: () => {
@@ -38,6 +48,51 @@ export default function InventoryPage() {
         });
     };
 
+    if (status === 'loading') {
+        return (
+            <div className="flex flex-col gap-6">
+                <div className="skeleton h-10 w-64 rounded-lg" />
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div className="skeleton h-80 rounded-xl" />
+                    <div className="skeleton h-80 rounded-xl md:col-span-2" />
+                </div>
+            </div>
+        );
+    }
+
+    if (!hasSession) {
+        return (
+            <div className="mx-auto flex max-w-3xl flex-col gap-6 pb-10">
+                <div>
+                    <h1 className="text-2xl font-bold text-gold">Meu Inventário</h1>
+                    <p className="mt-2 text-sm text-secondary">
+                        O inventário agora usa sessão real. Faça login para consultar e editar seus itens com segurança.
+                    </p>
+                </div>
+
+                <div className="card border border-gold/20 bg-gold/5 p-6">
+                    <p className="text-sm text-secondary">
+                        Sem autenticação, esta área não consulta mais `inventory.list` nem `inventory.summary`.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                        <Link
+                            href="/login?callbackUrl=%2Finventory"
+                            className="rounded-lg bg-gold px-4 py-2 font-semibold text-bg-primary"
+                        >
+                            Fazer login
+                        </Link>
+                        <Link
+                            href="/"
+                            className="rounded-lg border border-border px-4 py-2 font-semibold text-primary"
+                        >
+                            Voltar ao dashboard
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-6">
             {/* Header */}
@@ -49,6 +104,9 @@ export default function InventoryPage() {
                     </h1>
                     <p className="text-sm text-secondary">
                         Adicione os ingredientes e itens do seu armazém para calcular as oportunidades de lucro.
+                    </p>
+                    <p className="mt-2 text-xs uppercase tracking-wide text-secondary">
+                        Sessão ativa: {session?.user.username}
                     </p>
                 </div>
 

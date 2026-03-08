@@ -13,7 +13,6 @@ describe('market-auto-sync-utils', () => {
     it('habilita auto-sync por padrão fora de test e Vercel', () => {
         expect(resolveMarketAutoSyncConfig({
             NODE_ENV: 'development',
-            VERCEL: '0',
         })).toEqual({
             enabled: true,
             snapshotMaxAgeMs: DEFAULT_SNAPSHOT_MAX_AGE_MS,

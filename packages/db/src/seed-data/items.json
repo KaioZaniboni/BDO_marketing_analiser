@@ -5952,12 +5952,28 @@
     "isTradeable": true
   },
   {
+    "id": 4924,
+    "name": "Pó Maravilhoso de Espírito",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00004924",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 4987,
     "name": "Gema Negra de Magia Concentrada",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00004987",
     "grade": 4,
     "categoryId": 30,
     "isTradeable": true
+  },
+  {
+    "id": 4989,
+    "name": "Essência Vermelha",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00004989",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 4998,
@@ -6168,6 +6184,78 @@
     "isTradeable": true
   },
   {
+    "id": 5121,
+    "name": "Pedra Carbonizada pelo Fogo",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005121",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5122,
+    "name": "Pedra Inextinguível",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005122",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5125,
+    "name": "Fragmento de Brilho de Rune",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005125",
+    "grade": 3,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 5140,
+    "name": "Folha Afuafu de Merloberry",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005140",
+    "grade": 1,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 5198,
+    "name": "Lágrimas do Dragão",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005198",
+    "grade": 2,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 5201,
+    "name": "Fruta de Chama Carmesim",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005201",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5202,
+    "name": "Essência de Chama Carmesim",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005202",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5203,
+    "name": "Fruta da Abundância",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005203",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5204,
+    "name": "Essência da Abundância",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005204",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 5205,
     "name": "Fruto da Natureza",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005205",
@@ -6184,6 +6272,86 @@
     "isTradeable": true
   },
   {
+    "id": 5207,
+    "name": "Fruta do Sol",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005207",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5208,
+    "name": "Essência do Sol",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005208",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5209,
+    "name": "Fruta de Encantamento",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005209",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5210,
+    "name": "Essência de Encantamento",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005210",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5211,
+    "name": "Fruta do Poder Mágico",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005211",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5212,
+    "name": "Essência do Poder Mágico",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005212",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5213,
+    "name": "Fruta da Perfeição",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005213",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5214,
+    "name": "Essência da Perfeição",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005214",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5215,
+    "name": "Fruta da Destruição",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005215",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5216,
+    "name": "Essência da Destruição",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005216",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 5301,
     "name": "Reagente Líquido Limpo",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005301",
@@ -6198,6 +6366,38 @@
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 5303,
+    "name": "Fonte da Vida Persistente",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005303",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5304,
+    "name": "Cristal Variegado Bruto",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005304",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5305,
+    "name": "Pedra de Espírito Impecável",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005305",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5306,
+    "name": "Reagente da Amizade com Espírito",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005306",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 5401,
@@ -7368,6 +7568,14 @@
     "isTradeable": true
   },
   {
+    "id": 5651,
+    "name": "Pó de Fada",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005651",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 5801,
     "name": "Algodão",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005801",
@@ -7526,6 +7734,30 @@
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 5954,
+    "name": "Traço da Terra",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005954",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5955,
+    "name": "Traço de Ascensão",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005955",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 5959,
+    "name": "Traço de Caça",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005959",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 5960,
@@ -8272,6 +8504,14 @@
     "isTradeable": true
   },
   {
+    "id": 6500,
+    "name": "Pedra do Pensamento Intrincada",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00006500",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 6501,
     "name": "Fragmento de Coral",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00006501",
@@ -8302,6 +8542,14 @@
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 6511,
+    "name": "Lagosta",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00006511",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 6515,
@@ -10736,6 +10984,22 @@
     "isTradeable": true
   },
   {
+    "id": 8201,
+    "name": "Gobião",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00008201",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 8211,
+    "name": "Lula",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00008211",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 8411,
     "name": "Cristal do Desespero",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00008414",
@@ -12136,6 +12400,22 @@
     "isTradeable": true
   },
   {
+    "id": 9001,
+    "name": "Sal",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009001",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9002,
+    "name": "Açúcar",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009002",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 9003,
     "name": "Molho Branco",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009003",
@@ -12152,6 +12432,14 @@
     "isTradeable": true
   },
   {
+    "id": 9005,
+    "name": "Fermento",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009005",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 9006,
     "name": "Tempero",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009006",
@@ -12160,12 +12448,100 @@
     "isTradeable": true
   },
   {
+    "id": 9008,
+    "name": "Sal Desidratado ao Sol",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009008",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9009,
+    "name": "Açúcar Mascavo",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009009",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9015,
+    "name": "Azeite de Oliva",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009015",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9016,
+    "name": "Óleo para Fritura",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009016",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9017,
+    "name": "Vinho para Cozinha",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009017",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9018,
+    "name": "Molho Base",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009018",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9021,
+    "name": "Óleo de Milho",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009021",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9022,
+    "name": "Óleo de Gergelim",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009022",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9023,
+    "name": "Vinho Gastronômico",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009023",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9024,
+    "name": "Água Límpida",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009024",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 9057,
     "name": "Essência do Liquor",
     "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009057",
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 9059,
+    "name": "Água Mineral",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009059",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 9061,
@@ -12278,6 +12654,30 @@
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 9080,
+    "name": "Feijão Vermelho",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009080",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9082,
+    "name": "Trigo-sarraceno",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009082",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 9083,
+    "name": "Nokdu",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009083",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 9201,
@@ -14334,6 +14734,14 @@
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 9734,
+    "name": "Fragmento Quebrado de Pedra de Alquimia",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009734",
+    "grade": 0,
+    "categoryId": null,
+    "isTradeable": false
   },
   {
     "id": 9735,
@@ -20568,12 +20976,212 @@
     "isTradeable": true
   },
   {
+    "id": 15001,
+    "name": "Cristal Mágico de Chama Carmesim - Precisão",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045001_1",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15002,
+    "name": "Cristal Mágico de Chama Carmesim - Poder",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045002_1",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15003,
+    "name": "Cristal Mágico de Chama Carmesim - Carnificina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045003_0",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15004,
+    "name": "Cristal Mágico de Chama Carmesim - Carnificina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045004_0",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15005,
+    "name": "Cristal Mágico de Chama Carmesim - Carnificina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045005_0",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15006,
+    "name": "Cristal Mágico da Abundância - Armadura",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045011_0",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15007,
+    "name": "Cristal Mágico da Abundância - Vigor",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045012_5",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15008,
+    "name": "Cristal Mágico da Abundância - Paciência",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045013_5",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15009,
+    "name": "Cristal Mágico da Abundância - Cura",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045014_5",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15010,
+    "name": "Cristal Mágico da Abundância - Ressonância",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045015_5",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15011,
+    "name": "Cristal Mágico da Natureza - Rapidez",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045021_8",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15012,
+    "name": "Cristal Mágico da Natureza - Adamantina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15013,
+    "name": "Cristal Mágico da Natureza - Ascensão",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15014,
+    "name": "Cristal Mágico do Sol - Assalto",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045031_7",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15015,
+    "name": "Cristal Mágico do Sol - Robustez",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15016,
+    "name": "Cristal Mágico do Sol - Valor",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15017,
+    "name": "Cristal Mágico de Encantamento - Memória",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045041_3",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15018,
+    "name": "Cristal Mágico de Encantamento - Intimidação",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045042_3",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15019,
+    "name": "Cristal Mágico de Encantamento - Visão",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045043_3",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15020,
+    "name": "Cristal Mágico de Encantamento - Agilidade",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 15021,
     "name": "Cristal Mágico Perfeito",
     "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045051_0",
     "grade": 3,
     "categoryId": 50,
     "isTradeable": true
+  },
+  {
+    "id": 15027,
+    "name": "Cristal Mágico da Natureza - Queda",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15028,
+    "name": "Cristal Mágico da Natureza - Energia",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15029,
+    "name": "Cristal Mágico do Sol - Mira",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15030,
+    "name": "Cristal Mágico do Sol - Força",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15031,
+    "name": "Cristal Mágico de Encantamento - Experiência",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 15046,
@@ -20584,6 +21192,46 @@
     "isTradeable": true
   },
   {
+    "id": 15101,
+    "name": "Cristal Mágico do Infinito - Precisão",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045001_1",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15102,
+    "name": "Cristal Mágico do Infinito - Poder",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045002_1",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15103,
+    "name": "Cristal Mágico do Infinito - Carnificina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045003_0",
+    "grade": 2,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 15104,
+    "name": "Cristal Mágico do Infinito - Carnificina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045004_0",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15105,
+    "name": "Cristal Mágico do Infinito - Carnificina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045005_0",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 15106,
     "name": "Cristal Mágico do Infinito - Armadura",
     "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045011_0",
@@ -20592,12 +21240,164 @@
     "isTradeable": true
   },
   {
+    "id": 15107,
+    "name": "Cristal Mágico do Infinito - Vigor",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045012_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15108,
+    "name": "Cristal Mágico do Infinito - Paciência",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045013_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15109,
+    "name": "Cristal Mágico do Infinito - Cura",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045014_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15110,
+    "name": "Cristal Mágico do Infinito - Ressonância",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045015_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15111,
+    "name": "Cristal Mágico do Infinito - Rapidez",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045021_8",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15112,
+    "name": "Cristal Mágico do Infinito - Adamantina",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
+    "grade": 2,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 15113,
+    "name": "Cristal Mágico do Infinito - Ascensão",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15114,
+    "name": "Cristal Mágico do Infinito - Queda",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15115,
+    "name": "Cristal Mágico do Infinito - Energia",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15116,
+    "name": "Cristal Mágico do Infinito - Assalto",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045031_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15117,
+    "name": "Cristal Mágico do Infinito - Robustez",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15118,
+    "name": "Cristal Mágico do Infinito - Valor",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15119,
+    "name": "Cristal Mágico do Infinito - Mira",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15120,
+    "name": "Cristal Mágico do Infinito - Força",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15121,
+    "name": "Cristal Mágico do Infinito - Memória",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045041_3",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15122,
+    "name": "Cristal Mágico do Infinito - Intimidação",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045042_3",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15123,
+    "name": "Cristal Mágico do Infinito - Visão",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045043_3",
+    "grade": 2,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 15124,
+    "name": "Cristal Mágico do Infinito - Agilidade",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 15125,
     "name": "Cristal Mágico do Infinito - Experiência",
     "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
     "grade": 3,
     "categoryId": 50,
     "isTradeable": true
+  },
+  {
+    "id": 15126,
+    "name": "Cristal Mágico do Infinito - Durabilidade",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045001_1",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 15127,
@@ -20648,12 +21448,60 @@
     "isTradeable": true
   },
   {
+    "id": 15133,
+    "name": "Cristal Mágico do Infinito - Ataque Rápido",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045004_2",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15134,
+    "name": "Cristal Mágico do Infinito - Contra-Ataque",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045005_2",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15135,
+    "name": "Cristal Mágico do Infinito - Cerco",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045011_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 15136,
     "name": "Cristal Mágico do Infinito - Evasão",
     "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045012_5",
     "grade": 3,
     "categoryId": 50,
     "isTradeable": true
+  },
+  {
+    "id": 15137,
+    "name": "Cristal Mágico do Infinito - Defesa Corpo a Corpo",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045013_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15138,
+    "name": "Cristal Mágico do Infinito - Defesa à Distância",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045014_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15139,
+    "name": "Cristal Mágico do Infinito - Defesa Mágica",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045015_5",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 15146,
@@ -20670,6 +21518,30 @@
     "grade": 3,
     "categoryId": 50,
     "isTradeable": true
+  },
+  {
+    "id": 15148,
+    "name": "Cristal Mágico do Infinito - Ataque Corpo a Corpo",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045031_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 15149,
+    "name": "Cristal Mágico do Infinito - Ataque à Distância",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
+    "grade": 2,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 15150,
+    "name": "Cristal Mágico do Infinito - Ataque Mágico",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 15156,
@@ -21312,6 +22184,14 @@
     "isTradeable": true
   },
   {
+    "id": 15668,
+    "name": "Gaktunak",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00015668",
+    "grade": 4,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
     "id": 15669,
     "name": "Cristal de Presa Vermelho Escuro - Valor",
     "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00015669",
@@ -21656,6 +22536,14 @@
     "isTradeable": true
   },
   {
+    "id": 16002,
+    "name": "Pedra Negra (Armadura)",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00000007",
+    "grade": 4,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 16004,
     "name": "Pedra Negra de Magia Concentrada",
     "iconUrl": "New_Icon/06_PC_EquipItem/03_ETC/12_DoApplyDirectlyItem/00000018",
@@ -21670,6 +22558,14 @@
     "grade": 2,
     "categoryId": 35,
     "isTradeable": true
+  },
+  {
+    "id": 16080,
+    "name": "Pedra Cron",
+    "iconUrl": "New_Icon/03_ETC/00016080",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 16102,
@@ -39488,6 +40384,54 @@
     "isTradeable": true
   },
   {
+    "id": 42297,
+    "name": "Cristal da Negação",
+    "iconUrl": "New_Icon/03_ETC/04_DropItem/00042297",
+    "grade": 3,
+    "categoryId": null,
+    "isTradeable": false
+  },
+  {
+    "id": 42435,
+    "name": "Energia Latente de Chefe",
+    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00066115",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 42436,
+    "name": "Energia Latente de Nouver",
+    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00042436",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 42437,
+    "name": "Energia Latente de Karanda",
+    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00042437",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 42450,
+    "name": "Energia Latente de Kutum",
+    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00042450",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 42495,
+    "name": "Fragmento de Luz de Offin Tett",
+    "iconUrl": "New_Icon/03_ETC/10_Free_TradeItem/00055056",
+    "grade": 3,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 43786,
     "name": "Restos da Fenda",
     "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00043786",
@@ -39918,6 +40862,14 @@
     "grade": 3,
     "categoryId": 45,
     "isTradeable": true
+  },
+  {
+    "id": 45345,
+    "name": "Pedra Brilhante de Espírito da Proteção",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00045345",
+    "grade": 3,
+    "categoryId": null,
+    "isTradeable": false
   },
   {
     "id": 45503,
@@ -44374,6 +45326,14 @@
     "grade": 3,
     "categoryId": 30,
     "isTradeable": true
+  },
+  {
+    "id": 65741,
+    "name": "Essência de Tunta",
+    "iconUrl": "New_Icon/03_ETC/04_DropItem/00065741",
+    "grade": 0,
+    "categoryId": null,
+    "isTradeable": false
   },
   {
     "id": 290006,
@@ -73496,6 +74456,22 @@
     "isTradeable": true
   },
   {
+    "id": 721009,
+    "name": "Pedra Negra de Magia Estável",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00721009",
+    "grade": 1,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 721010,
+    "name": "Pedra Negra de Magia Purificada",
+    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00721010",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 730504,
     "name": "Estrela da Manhã Elsh",
     "iconUrl": "New_Icon/06_PC_EquipItem/00_Common/01_Weapon/00730504",
@@ -78104,6 +79080,14 @@
     "isTradeable": true
   },
   {
+    "id": 766108,
+    "name": "Cristal Mágico de Pedra de Luz",
+    "iconUrl": "New_Icon/03_ETC/00766108",
+    "grade": 2,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
     "id": 767091,
     "name": "Estilhaço de Dekia",
     "iconUrl": "New_Icon/03_ETC/00767091",
@@ -78510,6 +79494,22 @@
     "grade": 0,
     "categoryId": 25,
     "isTradeable": true
+  },
+  {
+    "id": 820114,
+    "name": "Jujuba",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00820114",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
+  },
+  {
+    "id": 820116,
+    "name": "Ginkgo",
+    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00820116",
+    "grade": 0,
+    "categoryId": 255,
+    "isTradeable": false
   },
   {
     "id": 820117,
@@ -79774,993 +80774,5 @@
     "grade": 3,
     "categoryId": 55,
     "isTradeable": true
-  },
-  {
-    "id": 9005,
-    "name": "Fermento",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009005",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9002,
-    "name": "Açúcar",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009002",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9059,
-    "name": "Água Mineral",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009059",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9080,
-    "name": "Feijão Vermelho",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009080",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9009,
-    "name": "Açúcar Mascavo",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009009",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9015,
-    "name": "Azeite de Oliva",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009015",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9021,
-    "name": "Óleo de Milho",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009021",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9001,
-    "name": "Sal",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009001",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 8201,
-    "name": "Gobião",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00008201",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9023,
-    "name": "Vinho Gastronômico",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009023",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9017,
-    "name": "Vinho para Cozinha",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009017",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9008,
-    "name": "Sal Desidratado ao Sol",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009008",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 8211,
-    "name": "Lula",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00008211",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9016,
-    "name": "Óleo para Fritura",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009016",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9022,
-    "name": "Óleo de Gergelim",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009022",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15019,
-    "name": "Cristal Mágico de Encantamento - Visão",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045043_3",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9734,
-    "name": "Fragmento Quebrado de Pedra de Alquimia",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009734",
-    "grade": 0,
-    "isTradeable": false
-  },
-  {
-    "id": 42297,
-    "name": "Cristal da Negação",
-    "iconUrl": "New_Icon/03_ETC/04_DropItem/00042297",
-    "grade": 3,
-    "isTradeable": false
-  },
-  {
-    "id": 5303,
-    "name": "Fonte da Vida Persistente",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005303",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5304,
-    "name": "Cristal Variegado Bruto",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005304",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5305,
-    "name": "Pedra de Espírito Impecável",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005305",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 766108,
-    "name": "Cristal Mágico de Pedra de Luz",
-    "iconUrl": "New_Icon/03_ETC/00766108",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 16002,
-    "name": "Pedra Negra (Armadura)",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00000007",
-    "grade": 4,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5121,
-    "name": "Pedra Carbonizada pelo Fogo",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005121",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5122,
-    "name": "Pedra Inextinguível",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005122",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 4924,
-    "name": "Pó Maravilhoso de Espírito",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00004924",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 16080,
-    "name": "Pedra Cron",
-    "iconUrl": "New_Icon/03_ETC/00016080",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5306,
-    "name": "Reagente da Amizade com Espírito",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005306",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 45345,
-    "name": "Pedra Brilhante de Espírito da Proteção",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00045345",
-    "grade": 3,
-    "isTradeable": false
-  },
-  {
-    "id": 9083,
-    "name": "Nokdu",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009083",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9018,
-    "name": "Molho Base",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009018",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9024,
-    "name": "Água Límpida",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009024",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 9082,
-    "name": "Trigo-sarraceno",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00009082",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5198,
-    "name": "Lágrimas do Dragão",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005198",
-    "grade": 2,
-    "isTradeable": false
-  },
-  {
-    "id": 6511,
-    "name": "Lagosta",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00006511",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 820116,
-    "name": "Ginkgo",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00820116",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 4989,
-    "name": "Essência Vermelha",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00004989",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15668,
-    "name": "Gaktunak",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00015668",
-    "grade": 4,
-    "isTradeable": false
-  },
-  {
-    "id": 721009,
-    "name": "Pedra Negra de Magia Estável",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00721009",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 721010,
-    "name": "Pedra Negra de Magia Purificada",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00721010",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5125,
-    "name": "Fragmento de Brilho de Rune",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005125",
-    "grade": 3,
-    "isTradeable": false
-  },
-  {
-    "id": 5651,
-    "name": "Pó de Fada",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005651",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5140,
-    "name": "Folha Afuafu de Merloberry",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005140",
-    "grade": 1,
-    "isTradeable": false
-  },
-  {
-    "id": 5208,
-    "name": "Essência do Sol",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005208",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5207,
-    "name": "Fruta do Sol",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005207",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5954,
-    "name": "Traço da Terra",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005954",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5211,
-    "name": "Fruta do Poder Mágico",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005211",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5212,
-    "name": "Essência do Poder Mágico",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005212",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 42435,
-    "name": "Energia Latente de Chefe",
-    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00066115",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 65741,
-    "name": "Essência de Tunta",
-    "iconUrl": "New_Icon/03_ETC/04_DropItem/00065741",
-    "grade": 0,
-    "isTradeable": false
-  },
-  {
-    "id": 42495,
-    "name": "Fragmento de Luz de Offin Tett",
-    "iconUrl": "New_Icon/03_ETC/10_Free_TradeItem/00055056",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 42450,
-    "name": "Energia Latente de Kutum",
-    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00042450",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 42436,
-    "name": "Energia Latente de Nouver",
-    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00042436",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 42437,
-    "name": "Energia Latente de Karanda",
-    "iconUrl": "New_Icon/03_ETC/03_Quest_Item/00042437",
-    "grade": 3,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5209,
-    "name": "Fruta de Encantamento",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005209",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5210,
-    "name": "Essência de Encantamento",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005210",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5201,
-    "name": "Fruta de Chama Carmesim",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005201",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5955,
-    "name": "Traço de Ascensão",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005955",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5202,
-    "name": "Essência de Chama Carmesim",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005202",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5214,
-    "name": "Essência da Perfeição",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005214",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5213,
-    "name": "Fruta da Perfeição",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005213",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5216,
-    "name": "Essência da Destruição",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005216",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5215,
-    "name": "Fruta da Destruição",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005215",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5204,
-    "name": "Essência da Abundância",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005204",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5203,
-    "name": "Fruta da Abundância",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005203",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 5959,
-    "name": "Traço de Caça",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00005959",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15001,
-    "name": "Cristal Mágico de Chama Carmesim - Precisão",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045001_1",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15123,
-    "name": "Cristal Mágico do Infinito - Visão",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045043_3",
-    "grade": 2,
-    "isTradeable": false
-  },
-  {
-    "id": 15007,
-    "name": "Cristal Mágico da Abundância - Vigor",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045012_5",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15107,
-    "name": "Cristal Mágico do Infinito - Vigor",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045012_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15016,
-    "name": "Cristal Mágico do Sol - Valor",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15118,
-    "name": "Cristal Mágico do Infinito - Valor",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15015,
-    "name": "Cristal Mágico do Sol - Robustez",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15117,
-    "name": "Cristal Mágico do Infinito - Robustez",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15010,
-    "name": "Cristal Mágico da Abundância - Ressonância",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045015_5",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15110,
-    "name": "Cristal Mágico do Infinito - Ressonância",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045015_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15011,
-    "name": "Cristal Mágico da Natureza - Rapidez",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045021_8",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15111,
-    "name": "Cristal Mágico do Infinito - Rapidez",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045021_8",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15027,
-    "name": "Cristal Mágico da Natureza - Queda",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15114,
-    "name": "Cristal Mágico do Infinito - Queda",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15101,
-    "name": "Cristal Mágico do Infinito - Precisão",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045001_1",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15002,
-    "name": "Cristal Mágico de Chama Carmesim - Poder",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045002_1",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15102,
-    "name": "Cristal Mágico do Infinito - Poder",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045002_1",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15008,
-    "name": "Cristal Mágico da Abundância - Paciência",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045013_5",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15108,
-    "name": "Cristal Mágico do Infinito - Paciência",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045013_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15029,
-    "name": "Cristal Mágico do Sol - Mira",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15119,
-    "name": "Cristal Mágico do Infinito - Mira",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15017,
-    "name": "Cristal Mágico de Encantamento - Memória",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045041_3",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15121,
-    "name": "Cristal Mágico do Infinito - Memória",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045041_3",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15018,
-    "name": "Cristal Mágico de Encantamento - Intimidação",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045042_3",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15122,
-    "name": "Cristal Mágico do Infinito - Intimidação",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045042_3",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15030,
-    "name": "Cristal Mágico do Sol - Força",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15120,
-    "name": "Cristal Mágico do Infinito - Força",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15031,
-    "name": "Cristal Mágico de Encantamento - Experiência",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15028,
-    "name": "Cristal Mágico da Natureza - Energia",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15115,
-    "name": "Cristal Mágico do Infinito - Energia",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15126,
-    "name": "Cristal Mágico do Infinito - Durabilidade",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045001_1",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15139,
-    "name": "Cristal Mágico do Infinito - Defesa Mágica",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045015_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15137,
-    "name": "Cristal Mágico do Infinito - Defesa Corpo a Corpo",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045013_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15138,
-    "name": "Cristal Mágico do Infinito - Defesa à Distância",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045014_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15009,
-    "name": "Cristal Mágico da Abundância - Cura",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045014_5",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15109,
-    "name": "Cristal Mágico do Infinito - Cura",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045014_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15134,
-    "name": "Cristal Mágico do Infinito - Contra-Ataque",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045005_2",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15135,
-    "name": "Cristal Mágico do Infinito - Cerco",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045011_5",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15005,
-    "name": "Cristal Mágico de Chama Carmesim - Carnificina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045005_0",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15105,
-    "name": "Cristal Mágico do Infinito - Carnificina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045005_0",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15003,
-    "name": "Cristal Mágico de Chama Carmesim - Carnificina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045003_0",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15103,
-    "name": "Cristal Mágico do Infinito - Carnificina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045003_0",
-    "grade": 2,
-    "isTradeable": false
-  },
-  {
-    "id": 15004,
-    "name": "Cristal Mágico de Chama Carmesim - Carnificina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045004_0",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15104,
-    "name": "Cristal Mágico do Infinito - Carnificina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045004_0",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15133,
-    "name": "Cristal Mágico do Infinito - Ataque Rápido",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045004_2",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15150,
-    "name": "Cristal Mágico do Infinito - Ataque Mágico",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045033_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15148,
-    "name": "Cristal Mágico do Infinito - Ataque Corpo a Corpo",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045031_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15149,
-    "name": "Cristal Mágico do Infinito - Ataque à Distância",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045032_7",
-    "grade": 2,
-    "isTradeable": false
-  },
-  {
-    "id": 15014,
-    "name": "Cristal Mágico do Sol - Assalto",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045031_7",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15116,
-    "name": "Cristal Mágico do Infinito - Assalto",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045031_7",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15013,
-    "name": "Cristal Mágico da Natureza - Ascensão",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15113,
-    "name": "Cristal Mágico do Infinito - Ascensão",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045023_8",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15006,
-    "name": "Cristal Mágico da Abundância - Armadura",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045011_0",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15020,
-    "name": "Cristal Mágico de Encantamento - Agilidade",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15124,
-    "name": "Cristal Mágico do Infinito - Agilidade",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045044_3",
-    "grade": 2,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15012,
-    "name": "Cristal Mágico da Natureza - Adamantina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 15112,
-    "name": "Cristal Mágico do Infinito - Adamantina",
-    "iconUrl": "New_Icon/03_ETC/11_Enchant_Material/00045022_8",
-    "grade": 2,
-    "isTradeable": false
-  },
-  {
-    "id": 6500,
-    "name": "Pedra do Pensamento Intrincada",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00006500",
-    "grade": 1,
-    "categoryId": 255,
-    "isTradeable": false
-  },
-  {
-    "id": 820114,
-    "name": "Jujuba",
-    "iconUrl": "New_Icon/03_ETC/07_ProductMaterial/00820114",
-    "grade": 0,
-    "categoryId": 255,
-    "isTradeable": false
   }
 ]
