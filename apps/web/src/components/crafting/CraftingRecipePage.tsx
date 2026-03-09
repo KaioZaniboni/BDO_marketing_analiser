@@ -210,7 +210,7 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
                 onToggleShowSettings={() => setShowSettings((current) => !current)}
             />
 
-            <div className="grid gap-6 xl:items-start xl:grid-cols-[minmax(0,0.93fr)_minmax(390px,460px)] 2xl:grid-cols-[minmax(0,0.9fr)_minmax(420px,500px)]">
+            <div className="grid gap-6 xl:items-start xl:grid-cols-[minmax(0,0.86fr)_minmax(440px,560px)] 2xl:grid-cols-[minmax(0,0.82fr)_minmax(500px,620px)]">
                 <CraftingRecipeMainPanel
                     activeTab={activeTab}
                     onActiveTabChange={setActiveTab}

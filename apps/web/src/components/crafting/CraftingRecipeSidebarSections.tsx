@@ -95,10 +95,11 @@ function formatQuantity(value: number) {
 }
 
 function getTreeDepthStyle(depth: number): CSSProperties {
-    const mobileDepth = depth <= 2 ? depth : 2 + (depth - 2) * 0.4;
+    const mobileDepth = depth <= 2 ? depth : 2 + Math.min(depth - 2, 1) * 0.45;
+    const desktopDepth = depth <= 3 ? depth : 3 + Math.min(depth - 3, 1) * 0.55;
 
     return {
-        '--recipe-tree-depth-desktop': String(depth),
+        '--recipe-tree-depth-desktop': desktopDepth.toFixed(2),
         '--recipe-tree-depth-mobile': mobileDepth.toFixed(2),
     } as CSSProperties;
 }
@@ -438,8 +439,10 @@ function TreeNodeViewInternal({
                         </div>
                     </div>
 
-                    <div className="recipe-tree-icon">
-                        {getNodeIcon(node)}
+                    <div className="recipe-tree-side recipe-tree-side-recipe">
+                        <div className="recipe-tree-icon">
+                            {getNodeIcon(node)}
+                        </div>
                     </div>
                 </div>
             </article>
