@@ -13,26 +13,37 @@ export type ProfitChartPoint = {
     value: number;
 };
 
-export const SOURCE_META: Record<PriceBreakdown['source'], { label: string; tone: string; description: string }> = {
+type SourceMeta = {
+    label: string;
+    tone: string;
+    description: string;
+    compactDescription: string;
+};
+
+export const SOURCE_META: Record<PriceBreakdown['source'], SourceMeta> = {
     market: {
         label: 'Mercado',
         tone: 'border-info/30 bg-info/10 text-info',
         description: 'Preço vindo do mercado atual.',
+        compactDescription: 'Mercado atual.',
     },
     custom: {
         label: 'Manual',
         tone: 'border-gold/30 bg-gold/10 text-gold',
         description: 'Preço ajustado manualmente nas configurações do cálculo.',
+        compactDescription: 'Preço manual.',
     },
     vendor: {
         label: 'Vendor/NPC',
         tone: 'border-profit/30 bg-profit/10 text-profit',
         description: 'Item tratado como compra direta de vendor/NPC.',
+        compactDescription: 'Compra vendor/NPC.',
     },
     missing: {
         label: 'Sem preço',
         tone: 'border-loss/30 bg-loss/10 text-loss',
         description: 'Sem preço confiável no mercado; revise manualmente se necessário.',
+        compactDescription: 'Sem preço confiável.',
     },
 };
 
@@ -46,11 +57,17 @@ export function formatSilver(value: number): string {
     return value.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
 }
 
-export function SourceBadge({ source }: { source: PriceBreakdown['source'] }) {
+export function SourceBadge({
+    source,
+    className = '',
+}: {
+    source: PriceBreakdown['source'];
+    className?: string;
+}) {
     const meta = SOURCE_META[source];
 
     return (
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${meta.tone}`}>
+        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${meta.tone} ${className}`.trim()}>
             {meta.label}
         </span>
     );
@@ -60,20 +77,37 @@ export function SourceDescription({
     source,
     totalTrades,
     currentStock,
+    variant = 'default',
 }: {
     source: PriceBreakdown['source'];
     totalTrades: number;
     currentStock: number;
+    variant?: 'default' | 'compact';
 }) {
+    const meta = SOURCE_META[source];
+
+    if (variant === 'compact') {
+        if (source === 'market') {
+            return (
+                <>
+                    <span className="block">Mercado atual.</span>
+                    <span className="block">Estoque: {formatSilver(currentStock)} • Trades: {formatSilver(totalTrades)}</span>
+                </>
+            );
+        }
+
+        return <span>{meta.compactDescription}</span>;
+    }
+
     if (source === 'market') {
         return (
             <span>
-                {SOURCE_META[source].description} Estoque: {formatSilver(currentStock)} • Trades: {formatSilver(totalTrades)}
+                {meta.description} Estoque: {formatSilver(currentStock)} • Trades: {formatSilver(totalTrades)}
             </span>
         );
     }
 
-    return <span>{SOURCE_META[source].description}</span>;
+    return <span>{meta.description}</span>;
 }
 
 export function SectionHeader({ title, description }: { title: string; description: string }) {

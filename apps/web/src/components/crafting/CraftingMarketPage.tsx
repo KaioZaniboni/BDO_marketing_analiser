@@ -21,6 +21,7 @@ import { resolveBdoIconUrl } from '@/lib/icon-url';
 import {
     buildOverviewRows,
     mapGlobalSettingsToCraftingSettings,
+    type CalculatorItem,
     type CraftingCalculatorState,
     type CalculatorRecipe,
     type RecipeOverviewRow,
@@ -173,10 +174,18 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
         () => (type === 'alchemy' ? ['alchemy', 'cooking'] : ['cooking']),
         [type],
     );
-    const { data: recipes, isLoading } = trpc.recipe.catalog.useQuery({
+    const { data: catalogData, isLoading } = trpc.recipe.catalog.useQuery({
         types: catalogTypes,
         historyDays: 28,
     });
+    const recipes = useMemo(
+        () => ((catalogData?.recipes ?? []) as CalculatorRecipe[]),
+        [catalogData],
+    );
+    const supportItems = useMemo(
+        () => ((catalogData?.supportItems ?? []) as CalculatorItem[]),
+        [catalogData],
+    );
 
     useEffect(() => {
         window.localStorage.setItem(getStorageKey(type), JSON.stringify({ searchTerm, sorts, filters }));
@@ -210,8 +219,8 @@ export function CraftingMarketPage({ type }: CraftingMarketPageProps) {
     ]);
 
     const rows = useMemo(
-        () => buildOverviewRows((recipes ?? []) as CalculatorRecipe[], type, craftingSettings, calculatorState),
-        [calculatorState, craftingSettings, recipes, type],
+        () => buildOverviewRows(recipes, type, craftingSettings, calculatorState, supportItems),
+        [calculatorState, craftingSettings, recipes, supportItems, type],
     );
 
     const filteredRows = useMemo(() => {

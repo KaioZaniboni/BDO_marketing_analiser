@@ -54,9 +54,9 @@ export default function RecipeDetailsPage() {
     const resultPrice = recipe.resultItem.prices[0]
         ? Number(recipe.resultItem.prices[0].lastSoldPrice ?? recipe.resultItem.prices[0].basePrice)
         : 0;
+    const ingredients = recipe.ingredients as Ingredient[];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ingredientCost = recipe.ingredients.reduce((sum: number, ing: any) => {
+    const ingredientCost = ingredients.reduce((sum: number, ing) => {
         const price = ing.item.prices[0]
             ? Number(ing.item.prices[0].lastSoldPrice ?? ing.item.prices[0].basePrice)
             : 0;
@@ -144,19 +144,18 @@ export default function RecipeDetailsPage() {
                         <h3 className="font-semibold text-primary flex items-center gap-2 mb-4">
                             <Package size={18} className="text-info" /> Ingredientes
                         </h3>
-                        <div className="space-y-3">
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {recipe.ingredients.map((ing: any) => {
+                        <div className="space-y-4">
+                            {ingredients.map((ing) => {
                                 const ingPrice = ing.item.prices[0]
                                     ? Number(ing.item.prices[0].lastSoldPrice ?? ing.item.prices[0].basePrice)
                                     : 0;
                                 const totalCost = ing.quantity * ingPrice;
 
                                 return (
-                                    <div key={ing.itemId} className="flex justify-between items-center p-3 bg-bg-hover/30 rounded border border-border">
-                                        <div>
+                                    <div key={ing.itemId} className="flex items-start justify-between gap-4 px-4 py-4 bg-bg-hover/30 rounded-xl border border-border">
+                                        <div className="space-y-1.5">
                                             <p className="font-medium text-sm text-primary">{ing.item.name}</p>
-                                            <p className="text-xs text-secondary mt-1">
+                                            <p className="text-xs leading-5 text-secondary">
                                                 {ing.quantity}x • {ingPrice.toLocaleString('pt-BR')} S/un
                                             </p>
                                         </div>

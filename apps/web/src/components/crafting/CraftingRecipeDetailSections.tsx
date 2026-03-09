@@ -13,9 +13,15 @@ import { OverviewPanel } from './CraftingRecipeOverviewPanel';
 import type { DetailTab } from './CraftingRecipeTabs';
 import { WeightPanel } from './CraftingRecipeWeightPanel';
 
-export function DetailSummaryGrid({ tree }: { tree: RecipeTreeNode }) {
+export function DetailSummaryGrid({
+    tree,
+    className = '',
+}: {
+    tree: RecipeTreeNode;
+    className?: string;
+}) {
     return (
-        <div className="grid gap-px border-t border-border bg-border md:grid-cols-4">
+        <div className={`grid gap-px border-t border-border bg-border md:grid-cols-4 ${className}`}>
             <div className="bg-bg-hover/10 p-4">
                 <p className="text-[11px] uppercase tracking-wider text-secondary">Custo</p>
                 <p className="mt-1 font-mono text-lg text-loss">{formatSilver(tree.craftingCost)}</p>

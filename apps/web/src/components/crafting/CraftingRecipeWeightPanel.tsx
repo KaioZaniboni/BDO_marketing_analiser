@@ -23,19 +23,19 @@ export function WeightPanel({
                 <table className="min-w-full text-sm">
                     <thead className="text-xs uppercase text-secondary">
                         <tr>
-                            <th className="px-4 py-3 text-left">Item</th>
-                            <th className="px-4 py-3 text-right">Qtd</th>
-                            <th className="px-4 py-3 text-right">Peso un.</th>
-                            <th className="px-4 py-3 text-right">Peso total</th>
+                            <th className="px-4 py-4 text-left">Item</th>
+                            <th className="px-4 py-4 text-right">Qtd</th>
+                            <th className="px-4 py-4 text-right">Peso un.</th>
+                            <th className="px-4 py-4 text-right">Peso total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {leafInputs.map((input) => (
                             <tr key={input.itemId} className="border-t border-border">
-                                <td className="px-4 py-3 text-primary">{input.name}</td>
-                                <td className="px-4 py-3 text-right font-mono text-primary">{input.quantity.toFixed(2)}</td>
-                                <td className="px-4 py-3 text-right font-mono text-secondary">{input.weightPerUnit.toFixed(2)}</td>
-                                <td className="px-4 py-3 text-right font-mono text-primary">{(input.quantity * input.weightPerUnit).toFixed(2)}</td>
+                                <td className="px-4 py-4 text-primary">{input.name}</td>
+                                <td className="px-4 py-4 text-right font-mono text-primary">{input.quantity.toFixed(2)}</td>
+                                <td className="px-4 py-4 text-right font-mono text-secondary">{input.weightPerUnit.toFixed(2)}</td>
+                                <td className="px-4 py-4 text-right font-mono text-primary">{(input.quantity * input.weightPerUnit).toFixed(2)}</td>
                             </tr>
                         ))}
                     </tbody>

@@ -22,9 +22,9 @@ describe('canonical recipe reader', () => {
             name: 'Beer Alt',
             type: 'cooking',
             resultItemId: 9213,
-            resultQuantity: 2.5,
+            resultQuantity: 1,
             procItemId: 2352,
-            procQuantity: 0.3,
+            procQuantity: 1,
             masteryBonusPct: 0,
             experience: 400,
             cookTimeSeconds: 1.2,
@@ -40,6 +40,33 @@ describe('canonical recipe reader', () => {
 
         expect(recipe).toMatchObject({ id: 454, name: 'Beer', type: 'cooking' });
         expect(recipe?.ingredients.map((ingredient) => ingredient.itemId)).toEqual([10, 20]);
+    });
+
+    it('recovers max output quantities from the raw legacy snapshot', () => {
+        const recipe = mapCanonicalVariantToRecipe({
+            legacyRecipeId: 457,
+            name: 'Pickled Vegetables',
+            type: 'cooking',
+            resultItemId: 9202,
+            resultQuantity: 1,
+            procItemId: 9281,
+            procQuantity: 1,
+            masteryBonusPct: 0,
+            experience: 400,
+            cookTimeSeconds: 1.2,
+            categoryId: null,
+            resultItem: createItem(9202, 'Pickled Vegetables'),
+            procItem: createItem(9281, 'Sweet and Sour Pickled Vegetables'),
+            craft: { name: 'Pickled Vegetables', slots: [] },
+            slotSelections: [],
+        });
+
+        expect(recipe).toMatchObject({
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
+            procQuantity: 1,
+            procMaxQuantity: 2,
+        });
     });
 
     it('builds explicit slot alternatives preserving the selected option first and mapping sub-recipes', () => {

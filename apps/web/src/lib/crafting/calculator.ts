@@ -7,6 +7,7 @@ import {
     type AlchemyMasteryEntry,
     type CookingMasteryEntry,
 } from '@/lib/crafting/constants';
+import { BYPRODUCT_ITEM_LABELS } from '@/lib/crafting/byproducts';
 import { buildIngredientAlternativesBySlot } from '@bdo/api/src/services/recipe-alternatives';
 import { getRecipeVariantKey } from '@bdo/api/src/services/recipe-identity';
 
@@ -54,8 +55,10 @@ export interface CalculatorRecipe {
     cookTimeSeconds: number;
     resultItemId: number;
     resultQuantity: number;
+    resultMaxQuantity?: number | null;
     procItemId?: number | null;
     procQuantity?: number | null;
+    procMaxQuantity?: number | null;
     resultItem: CalculatorItem;
     procItem?: CalculatorItem | null;
     ingredients: CalculatorIngredient[];
@@ -212,7 +215,6 @@ const COOKING_RARE_BASE_CHANCE = 0.2;
 const ALCHEMY_RARE_BASE_CHANCE = 0.2;
 const COOKING_BYPRODUCT_CHANCE = 0.0236;
 const ALCHEMY_BYPRODUCT_CHANCE = 0.0236 * 3.7;
-const LOCAL_PROC_BASE_CHANCE = 0.3;
 
 function clampNonNegative(value: number): number {
     return Number.isFinite(value) ? Math.max(value, 0) : 0;
@@ -313,19 +315,18 @@ export function getItemPriceBreakdown(
     item: CalculatorItem | null | undefined,
     state: CraftingCalculatorState,
 ): PriceBreakdown {
-    if (!item) {
-        return {
-            unitPrice: 0,
-            source: 'missing',
-            totalTrades: 0,
-            currentStock: 0,
-        };
-    }
+    return getItemPriceBreakdownById(item?.id ?? null, item, state);
+}
 
-    const customPrice = state.customPrices[item.id];
+function getItemPriceBreakdownById(
+    itemId: number | null,
+    item: CalculatorItem | null | undefined,
+    state: CraftingCalculatorState,
+): PriceBreakdown {
+    const customPrice = itemId == null ? undefined : state.customPrices[itemId];
     const marketSnapshot = getMarketSnapshot(item);
     const marketPrice = toNumber(marketSnapshot?.lastSoldPrice ?? marketSnapshot?.basePrice ?? 0);
-    const vendorPrice = VENDOR_PRICE_MAP[item.id];
+    const vendorPrice = itemId == null ? undefined : VENDOR_PRICE_MAP[itemId];
     const currentStock = Number(marketSnapshot?.currentStock ?? 0);
     const totalTrades = toNumber(marketSnapshot?.totalTrades ?? 0);
 
@@ -344,25 +345,19 @@ export function getItemPriceBreakdown(
     return { unitPrice: 0, source: 'missing', totalTrades, currentStock };
 }
 
-function inferRangeFromAverage(average: number): { average: number; max: number } {
-    const sanitizedAverage = clampNonNegative(average);
-    if (sanitizedAverage === 0) {
-        return { average: 0, max: 0 };
-    }
+function getOutputRange(minimum: number | null | undefined, maximum: number | null | undefined): {
+    min: number;
+    max: number;
+    average: number;
+} {
+    const min = clampNonNegative(minimum ?? 0);
+    const max = Math.max(min, clampNonNegative(maximum ?? min));
 
-    if (Number.isInteger(sanitizedAverage)) {
-        return { average: sanitizedAverage, max: sanitizedAverage };
-    }
-
-    const max = Math.ceil(sanitizedAverage);
-    return { average: sanitizedAverage, max };
-}
-
-function inferRareAverageOutput(recipe: CalculatorRecipe): number {
-    if (!recipe.procQuantity) {
-        return 0;
-    }
-    return recipe.procQuantity / LOCAL_PROC_BASE_CHANCE;
+    return {
+        min,
+        max,
+        average: (min + max) / 2,
+    };
 }
 
 export function getRecipeRates(
@@ -374,12 +369,12 @@ export function getRecipeRates(
     if (recipe.type === 'alchemy') {
         const mastery = settings.alchemyMastery;
         const masteryEntry = getAlchemyMasteryEntry(mastery);
-        const normal = inferRangeFromAverage(recipe.resultQuantity);
-        const rareAverage = inferRareAverageOutput(recipe);
+        const normal = getOutputRange(recipe.resultQuantity, recipe.resultMaxQuantity);
+        const rare = getOutputRange(recipe.procQuantity, recipe.procMaxQuantity);
 
         return {
             normalProcRate: normal.average + (normal.max - normal.average) * masteryEntry.maxProcChance,
-            rareProcRate: includeRareProc ? rareAverage * ALCHEMY_RARE_BASE_CHANCE : 0,
+            rareProcRate: includeRareProc ? rare.average * ALCHEMY_RARE_BASE_CHANCE : 0,
             massProcRate: 1,
             timePerAction: settings.alchemyTime,
             mastery,
@@ -389,8 +384,8 @@ export function getRecipeRates(
     if (recipe.type === 'cooking') {
         const mastery = slowCook ? settings.slowCookingMastery : settings.speedCookingMastery;
         const masteryEntry = getCookingMasteryEntry(mastery);
-        const normal = inferRangeFromAverage(recipe.resultQuantity);
-        const rare = inferRangeFromAverage(inferRareAverageOutput(recipe));
+        const normal = getOutputRange(recipe.resultQuantity, recipe.resultMaxQuantity);
+        const rare = getOutputRange(recipe.procQuantity, recipe.procMaxQuantity);
 
         return {
             normalProcRate: normal.average + (normal.max - normal.average) * masteryEntry.maxProcChance,
@@ -459,6 +454,14 @@ function buildItemLookup(recipes: CalculatorRecipe[]): Map<number, CalculatorIte
         }
     }
 
+    return lookup;
+}
+
+function extendItemLookupWithSupportItems(
+    lookup: Map<number, CalculatorItem>,
+    supportItems: CalculatorItem[],
+): Map<number, CalculatorItem> {
+    supportItems.forEach((item) => lookup.set(item.id, item));
     return lookup;
 }
 
@@ -562,12 +565,12 @@ function buildByproductOutput(
     const chance = recipe.type === 'cooking' ? COOKING_BYPRODUCT_CHANCE : ALCHEMY_BYPRODUCT_CHANCE;
     const quantity = craftQuantity * quantityMultiplier * chance;
     const item = itemLookup.get(usageItemId);
-    const price = getItemPriceBreakdown(item, state);
+    const price = getItemPriceBreakdownById(usageItemId, item, state);
     const kept = state.keptItemIds.includes(usageItemId);
 
     return {
         itemId: usageItemId,
-        name: item?.name ?? `Item ${usageItemId}`,
+        name: item?.name ?? BYPRODUCT_ITEM_LABELS[usageItemId] ?? `Item ${usageItemId}`,
         quantity,
         unitPrice: price.unitPrice,
         totalRevenue: kept ? 0 : quantity * price.unitPrice * saleMultiplier,
@@ -601,13 +604,19 @@ export interface BuildContext {
 
 export function buildRecipeContext(options: {
     recipes: CalculatorRecipe[];
+    supportItems?: CalculatorItem[];
     settings: CraftingSettings;
     state: CraftingCalculatorState;
 }): BuildContext {
+    const itemLookup = extendItemLookupWithSupportItems(
+        buildItemLookup(options.recipes),
+        options.supportItems ?? [],
+    );
+
     return {
         groupedRecipes: groupRecipes(options.recipes),
         resultLookup: buildResultLookup(options.recipes),
-        itemLookup: buildItemLookup(options.recipes),
+        itemLookup,
         settings: options.settings,
         state: options.state,
         saleMultiplier: getNetSaleMultiplier(options.settings),
@@ -944,8 +953,9 @@ export function buildOverviewRows(
     type: 'cooking' | 'alchemy',
     settings: CraftingSettings,
     state: CraftingCalculatorState,
+    supportItems: CalculatorItem[] = [],
 ): RecipeOverviewRow[] {
-    const context = buildRecipeContext({ recipes, settings, state });
+    const context = buildRecipeContext({ recipes, supportItems, settings, state });
     const relevantRecipes = recipes.filter((recipe) => recipe.type === type);
     const groups = groupRecipes(relevantRecipes);
     const rows: RecipeOverviewRow[] = [];

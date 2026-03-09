@@ -52,9 +52,11 @@ describe('crafting calculator', () => {
             experience: 400,
             cookTimeSeconds: 1.2,
             resultItemId: 100,
-            resultQuantity: 2.5,
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
             procItemId: 101,
-            procQuantity: 0.45,
+            procQuantity: 1,
+            procMaxQuantity: 2,
             resultItem: createItem(100, 'Beer', 1_000),
             procItem: createItem(101, 'Cold Draft Beer', 5_000),
             ingredients: [
@@ -64,7 +66,7 @@ describe('crafting calculator', () => {
 
         const rates = getRecipeRates(recipe, settings, false, true);
 
-        expect(rates.normalProcRate).toBeCloseTo(2.58905, 5);
+        expect(rates.normalProcRate).toBeCloseTo(2.76715, 5);
         expect(rates.rareProcRate).toBeCloseTo(0.409338, 5);
         expect(rates.massProcRate).toBeCloseTo(4.0591, 4);
         expect(rates.timePerAction).toBeCloseTo(1.2, 5);
@@ -86,9 +88,11 @@ describe('crafting calculator', () => {
             experience: 400,
             cookTimeSeconds: 1.2,
             resultItemId: 100,
-            resultQuantity: 2.5,
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
             procItemId: 101,
-            procQuantity: 0.45,
+            procQuantity: 1,
+            procMaxQuantity: 2,
             resultItem: createItem(100, 'Beer', 1_000),
             procItem: createItem(101, 'Cold Draft Beer', 5_000),
             ingredients: [
@@ -105,8 +109,14 @@ describe('crafting calculator', () => {
         });
 
         expect(tree).not.toBeNull();
-        expect(tree?.outputs.find((row) => row.kind === 'normal')?.quantity).toBeCloseTo(2_589.05, 2);
+        expect(tree?.outputs.find((row) => row.kind === 'normal')?.quantity).toBeCloseTo(2_767.15, 2);
         expect(tree?.outputs.find((row) => row.kind === 'rare')?.quantity).toBeCloseTo(409.33928, 3);
+        expect(tree?.outputs.find((row) => row.kind === 'byproduct')).toMatchObject({
+            itemId: 9065,
+            name: 'Leite',
+            source: 'custom',
+            unitPrice: 1_000,
+        });
         expect(tree?.outputs.find((row) => row.kind === 'byproduct')?.quantity).toBeCloseTo(283.2, 2);
         expect(tree?.craftingCost).toBeCloseTo(100_000, 0);
         expect(tree?.totalTime).toBeCloseTo(295.632, 3);
@@ -122,9 +132,11 @@ describe('crafting calculator', () => {
             experience: 400,
             cookTimeSeconds: 1.2,
             resultItemId: 100,
-            resultQuantity: 2.5,
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
             procItemId: 101,
-            procQuantity: 0.45,
+            procQuantity: 1,
+            procMaxQuantity: 2,
             resultItem: createItem(100, 'Beer', 1_000),
             procItem: createItem(101, 'Cold Draft Beer', 5_000),
             ingredients: [
@@ -258,9 +270,11 @@ describe('crafting calculator', () => {
             experience: 400,
             cookTimeSeconds: 1.2,
             resultItemId: 100,
-            resultQuantity: 2.5,
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
             procItemId: 101,
-            procQuantity: 0.45,
+            procQuantity: 1,
+            procMaxQuantity: 2,
             resultItem: createItem(100, 'Beer', 1_000, 10, {
                 prices: [{ basePrice: 1_000, lastSoldPrice: 1_000, currentStock: 100, totalTrades: 999_999 }],
                 priceHistory: [
@@ -281,5 +295,75 @@ describe('crafting calculator', () => {
         expect(rows).toHaveLength(1);
         expect(rows[0]?.dailyVolume).toBe(42);
     });
-});
 
+    it('uses custom byproduct prices even when the item is outside the recipe tree payload', () => {
+        const settings = getDefaultCraftingSettings();
+        const state = {
+            ...getDefaultCalculatorState(),
+            customPrices: {
+                9065: 2_500,
+            },
+        };
+        const recipe: CalculatorRecipe = {
+            id: 1,
+            name: 'Beer',
+            type: 'cooking',
+            experience: 400,
+            cookTimeSeconds: 1.2,
+            resultItemId: 100,
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
+            procItemId: 101,
+            procQuantity: 1,
+            procMaxQuantity: 2,
+            resultItem: createItem(100, 'Beer', 1_000),
+            procItem: createItem(101, 'Cold Draft Beer', 5_000),
+            ingredients: [
+                { itemId: 9001, quantity: 5, sortOrder: 0, item: createItem(9001, 'Grain', 20) },
+            ],
+        };
+
+        const tree = buildRecipeTree({
+            recipes: [recipe],
+            rootRecipeId: 1,
+            craftQuantity: 10,
+            settings,
+            state,
+        });
+
+        expect(tree?.outputs.find((row) => row.kind === 'byproduct')).toMatchObject({
+            itemId: 9065,
+            name: 'Leite',
+            unitPrice: 2_500,
+            source: 'custom',
+        });
+    });
+
+    it('uses min/max output ranges for alchemy recipes', () => {
+        const settings = getDefaultCraftingSettings();
+        const recipe: CalculatorRecipe = {
+            id: 10,
+            name: 'Will Elixir',
+            type: 'alchemy',
+            experience: 400,
+            cookTimeSeconds: 1.2,
+            resultItemId: 702,
+            resultQuantity: 1,
+            resultMaxQuantity: 4,
+            procItemId: 703,
+            procQuantity: 1,
+            procMaxQuantity: 2,
+            resultItem: createItem(702, 'Will Elixir', 10_000),
+            procItem: createItem(703, 'Strong Will Elixir', 25_000),
+            ingredients: [
+                { itemId: 5001, quantity: 2, sortOrder: 0, item: createItem(5001, 'Material', 500) },
+            ],
+        };
+
+        const rates = getRecipeRates(recipe, settings, false, true);
+
+        expect(rates.normalProcRate).toBeCloseTo(3.01855, 5);
+        expect(rates.rareProcRate).toBeCloseTo(0.3, 5);
+        expect(rates.massProcRate).toBe(1);
+    });
+});

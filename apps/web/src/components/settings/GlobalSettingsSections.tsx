@@ -10,6 +10,10 @@ import {
     Sparkles,
     type LucideIcon,
 } from 'lucide-react';
+import {
+    ALCHEMY_BYPRODUCT_OPTIONS,
+    COOKING_BYPRODUCT_OPTIONS,
+} from '@/lib/crafting/byproducts';
 import type { GlobalSettings } from '@/stores/global-settings-store';
 
 interface Option {
@@ -49,26 +53,6 @@ interface SelectFieldProps {
     options: Option[];
 }
 
-const COOKING_BYPRODUCT_OPTIONS: Option[] = [
-    { value: 9065, label: 'Leite' },
-    { value: 9061, label: 'Creme' },
-    { value: 9062, label: 'Queijo' },
-    { value: 9213, label: 'Cerveja' },
-    { value: 9063, label: 'Manteiga' },
-    { value: 9780, label: "Witch\'s Delicacy" },
-];
-
-const ALCHEMY_BYPRODUCT_OPTIONS: Option[] = [
-    { value: 4801, label: 'Pó de Escuridão' },
-    { value: 4802, label: 'Pó de Chama' },
-    { value: 4803, label: 'Pó de Rachadura' },
-    { value: 4804, label: 'Pó da Terra' },
-    { value: 4805, label: 'Pó do Tempo' },
-    { value: 5301, label: 'Reagente Líquido Limpo' },
-    { value: 9733, label: 'Pó Brilhante' },
-    { value: 9781, label: 'Mysterious Catalyst' },
-];
-
 function formatPercent(value: number, fractionDigits = 2): string {
     return `${(value * 100).toLocaleString('pt-BR', {
         minimumFractionDigits: fractionDigits,
@@ -86,29 +70,29 @@ function getNetSaleMultiplier(settings: Pick<GlobalSettings, 'hasValuePack' | 'h
 
 function SettingsSection({ title, description, icon: Icon, compact = false, children }: SettingsSectionProps) {
     return (
-        <section className={compact ? 'rounded-xl border border-border bg-bg-primary/70 p-4' : 'card p-6'}>
-            <div className="mb-4 flex items-start gap-3">
+        <section className={compact ? 'rounded-2xl border border-border bg-bg-primary/70 p-5' : 'card p-6'}>
+            <div className="mb-5 flex items-start gap-3.5">
                 <div className="rounded-xl bg-bg-hover p-2 text-gold">
                     <Icon size={16} />
                 </div>
                 <div>
                     <h2 className={compact ? 'text-sm font-semibold text-primary' : 'text-lg font-semibold text-primary'}>{title}</h2>
-                    <p className="mt-1 text-xs text-secondary">{description}</p>
+                    <p className="mt-1.5 text-xs leading-5 text-secondary">{description}</p>
                 </div>
             </div>
-            <div className="space-y-3">{children}</div>
+            <div className="space-y-4">{children}</div>
         </section>
     );
 }
 
 function ToggleField({ label, description, checked, onChange }: ToggleFieldProps) {
     return (
-        <label className="flex items-start justify-between gap-4 rounded-xl border border-border bg-bg-hover/20 px-4 py-3">
-            <div>
+        <label className="flex items-start justify-between gap-4 rounded-xl border border-border bg-bg-hover/20 px-4 py-4">
+            <div className="space-y-1.5 pr-2">
                 <p className="text-sm font-medium text-primary">{label}</p>
-                <p className="mt-1 text-xs text-secondary">{description}</p>
+                <p className="text-xs leading-5 text-secondary">{description}</p>
             </div>
-            <span className="relative mt-0.5 inline-flex cursor-pointer items-center">
+            <span className="relative mt-1 inline-flex cursor-pointer items-center">
                 <input type="checkbox" className="peer sr-only" checked={checked} onChange={(event) => onChange(event.target.checked)} />
                 <span className="h-6 w-11 rounded-full bg-bg-primary transition-colors peer-checked:bg-gold peer-checked:after:translate-x-full after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-white after:transition-transform after:content-['']" />
             </span>
@@ -118,16 +102,16 @@ function ToggleField({ label, description, checked, onChange }: ToggleFieldProps
 
 function NumberField({ label, value, onChange, description, step = 1, min = 0 }: NumberFieldProps) {
     return (
-        <label className="flex flex-col gap-1 rounded-xl border border-border bg-bg-hover/20 px-4 py-3">
+        <label className="flex flex-col gap-2 rounded-xl border border-border bg-bg-hover/20 px-4 py-4">
             <span className="text-sm font-medium text-primary">{label}</span>
-            {description ? <span className="text-xs text-secondary">{description}</span> : null}
+            {description ? <span className="text-xs leading-5 text-secondary">{description}</span> : null}
             <input
                 type="number"
                 value={value}
                 min={min}
                 step={step}
                 onChange={(event) => onChange(Number(event.target.value))}
-                className="rounded-lg border border-border bg-bg-primary px-3 py-2 font-mono text-sm text-primary focus:border-gold focus:outline-none"
+                className="rounded-lg border border-border bg-bg-primary px-3 py-2.5 font-mono text-sm text-primary focus:border-gold focus:outline-none"
             />
         </label>
     );
@@ -135,13 +119,13 @@ function NumberField({ label, value, onChange, description, step = 1, min = 0 }:
 
 function SelectField({ label, value, onChange, description, options }: SelectFieldProps) {
     return (
-        <label className="flex flex-col gap-1 rounded-xl border border-border bg-bg-hover/20 px-4 py-3">
+        <label className="flex flex-col gap-2 rounded-xl border border-border bg-bg-hover/20 px-4 py-4">
             <span className="text-sm font-medium text-primary">{label}</span>
-            {description ? <span className="text-xs text-secondary">{description}</span> : null}
+            {description ? <span className="text-xs leading-5 text-secondary">{description}</span> : null}
             <select
                 value={value}
                 onChange={(event) => onChange(Number(event.target.value))}
-                className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:border-gold focus:outline-none"
+                className="rounded-lg border border-border bg-bg-primary px-3 py-2.5 text-sm text-primary focus:border-gold focus:outline-none"
             >
                 {options.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -216,7 +200,7 @@ export function GlobalSettingsMarketSection({ settings, compact = false }: { set
                 onChange={settings.setMerchantRing}
             />
 
-            <div className={compact ? 'grid gap-3' : 'grid gap-3 md:grid-cols-2'}>
+            <div className={compact ? 'grid gap-4' : 'grid gap-4 md:grid-cols-2'}>
                 <NumberField
                     label="Fama da Família"
                     value={settings.familyFame}
@@ -239,7 +223,7 @@ export function GlobalSettingsMarketSection({ settings, compact = false }: { set
 export function GlobalSettingsInventorySection({ settings, compact = false }: { settings: GlobalSettings; compact?: boolean }) {
     return (
         <SettingsSection title="Peso e inventário" description="Usado para estimar quantos crafts cabem antes de estourar o limite de LT." icon={Package2} compact={compact}>
-            <div className={compact ? 'grid gap-3' : 'grid gap-3 md:grid-cols-2'}>
+            <div className={compact ? 'grid gap-4' : 'grid gap-4 md:grid-cols-2'}>
                 <NumberField
                     label="Peso total (LT)"
                     value={settings.weight}
@@ -260,7 +244,7 @@ export function GlobalSettingsInventorySection({ settings, compact = false }: { 
 export function GlobalSettingsCookingSection({ settings, compact = false }: { settings: GlobalSettings; compact?: boolean }) {
     return (
         <SettingsSection title="Cooking" description="Maestria, tempos e valorização de byproduct usados no cálculo detalhado e na imperial." icon={ChefHat} compact={compact}>
-            <div className={compact ? 'grid gap-3' : 'grid gap-3 md:grid-cols-2'}>
+            <div className={compact ? 'grid gap-4' : 'grid gap-4 md:grid-cols-2'}>
                 <NumberField
                     label="Maestria rápida"
                     value={settings.speedCookingMastery}
@@ -304,7 +288,7 @@ export function GlobalSettingsCookingSection({ settings, compact = false }: { se
 export function GlobalSettingsAlchemySection({ settings, compact = false }: { settings: GlobalSettings; compact?: boolean }) {
     return (
         <SettingsSection title="Alchemy" description="Maestria, tempo e troca de byproduct usados no cálculo detalhado e na imperial." icon={FlaskConical} compact={compact}>
-            <div className={compact ? 'grid gap-3' : 'grid gap-3 md:grid-cols-2'}>
+            <div className={compact ? 'grid gap-4' : 'grid gap-4 md:grid-cols-2'}>
                 <NumberField
                     label="Maestria de alquimia"
                     value={settings.alchemyMastery}

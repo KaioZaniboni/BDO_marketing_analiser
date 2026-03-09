@@ -12,6 +12,7 @@ import {
     getWeightSummary,
     mapGlobalSettingsToCraftingSettings,
     toNumber,
+    type CalculatorItem,
     type CalculatorRecipe,
     type CraftingCalculatorState,
     type GlobalSettingsShape,
@@ -26,13 +27,12 @@ import {
 } from '@/stores/global-settings-store';
 import { CraftingRecipeHeader } from './CraftingRecipeHeader';
 import { CraftingRecipeMainPanel } from './CraftingRecipeMainPanel';
-import { SettingsPanel } from './CraftingRecipeSidebarSections';
+import { CraftingRecipeSidebarPanel } from './CraftingRecipeSidebarPanel';
 import {
     CraftingRecipeLoadingState,
     CraftingRecipeNotFoundState,
 } from './CraftingRecipeStates';
 import { type DetailTab } from './CraftingRecipeTabs';
-import { CraftingRecipeTreePanel } from './CraftingRecipeTreePanel';
 
 interface CraftingRecipePageProps {
     recipeId: number;
@@ -105,6 +105,10 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
     const { data: recipeData, isLoading } = trpc.recipe.getById.useQuery({ recipeId });
 
     const recipe = recipeData as CalculatorRecipe | undefined;
+    const supportItems = useMemo(
+        () => ((recipeData?.supportItems ?? []) as CalculatorItem[]),
+        [recipeData],
+    );
     const treeRecipes = useMemo(() => {
         if (!recipeData) {
             return [] as CalculatorRecipe[];
@@ -126,9 +130,14 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
     const craftQuantity = craftQuantities[recipeId] ?? 1000;
     const recipeContext = useMemo(
         () => (treeRecipes.length > 0
-            ? buildRecipeContext({ recipes: treeRecipes, settings: craftingSettings, state: calculatorState })
+            ? buildRecipeContext({
+                recipes: treeRecipes,
+                supportItems,
+                settings: craftingSettings,
+                state: calculatorState,
+            })
             : null),
-        [calculatorState, craftingSettings, treeRecipes],
+        [calculatorState, craftingSettings, supportItems, treeRecipes],
     );
 
     const tree = useMemo(() => {
@@ -201,10 +210,11 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
                 onToggleShowSettings={() => setShowSettings((current) => !current)}
             />
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_420px]">
+            <div className="grid gap-6 xl:items-start xl:grid-cols-[minmax(0,0.93fr)_minmax(390px,460px)] 2xl:grid-cols-[minmax(0,0.9fr)_minmax(420px,500px)]">
                 <CraftingRecipeMainPanel
                     activeTab={activeTab}
                     onActiveTabChange={setActiveTab}
+                    summaryClassName="xl:hidden"
                     detailContentProps={{
                         leafInputs,
                         customPrices,
@@ -220,22 +230,19 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
                     }}
                 />
 
-                <div className="space-y-6">
-                    {showSettings ? (
-                        <SettingsPanel type={recipe.type === 'alchemy' ? 'alchemy' : 'cooking'} />
-                    ) : (
-                        <CraftingRecipeTreePanel
-                            node={tree}
-                            onToggleCollapse={toggleCollapsed}
-                            onToggleRareProc={toggleRareProc}
-                            onToggleSlowCook={toggleSlowCook}
-                            onSelectMaterial={setSelectedMaterial}
-                            collapsedIds={collapsedIds}
-                            useRareProcIds={useRareProcIds}
-                            slowCookedIds={slowCookedIds}
-                        />
-                    )}
-                </div>
+                <CraftingRecipeSidebarPanel
+                    tree={tree}
+                    recipeType={recipe.type}
+                    showSettings={showSettings}
+                    node={tree}
+                    onToggleCollapse={toggleCollapsed}
+                    onToggleRareProc={toggleRareProc}
+                    onToggleSlowCook={toggleSlowCook}
+                    onSelectMaterial={setSelectedMaterial}
+                    collapsedIds={collapsedIds}
+                    useRareProcIds={useRareProcIds}
+                    slowCookedIds={slowCookedIds}
+                />
             </div>
         </div>
     );

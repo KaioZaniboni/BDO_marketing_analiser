@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@bdo/db';
 import { buildIngredientAlternativesBySlot, type IngredientAlternativeWithSubRecipe, type SubRecipeReference } from './recipe-alternatives';
 import { compareRecipesByTypeNameId, filterRecipesByTypes, type SupportedRecipeType } from './recipe-classification';
+import { getLegacyRecipeOutputRange } from './legacy-recipe-output-ranges';
 
 const CANONICAL_UNAVAILABLE_MESSAGE = 'Leitura canônica de receitas indisponível. Execute a materialização canônica antes de usar o runtime.';
 
@@ -71,8 +72,10 @@ export interface CanonicalReadableRecipe {
     type: string;
     resultItemId: number;
     resultQuantity: number;
+    resultMaxQuantity?: number | null;
     procItemId: number | null;
     procQuantity: number | null;
+    procMaxQuantity?: number | null;
     masteryBonusPct: number;
     experience: number;
     cookTimeSeconds: number;
@@ -91,6 +94,7 @@ export interface CanonicalRecipeDetail {
     recipe: CanonicalReadableRecipe;
     ingredientAlternatives: Record<number, IngredientAlternativeWithSubRecipe<CanonicalReadableRecipe['ingredients'][number], string>[]>;
     treeRecipes: CanonicalReadableRecipe[];
+    supportItems: RecipeItem[];
 }
 
 export class CanonicalRecipesUnavailableError extends Error {
@@ -162,6 +166,11 @@ export function mapCanonicalVariantToRecipe(variant: CanonicalVariantRecord): Ca
     }
 
     const selections = [...variant.slotSelections].sort(sortSelections);
+    const outputRange = getLegacyRecipeOutputRange(
+        variant.legacyRecipeId,
+        variant.resultItemId,
+        variant.procItemId,
+    );
 
     return {
         id: variant.legacyRecipeId,
@@ -169,8 +178,10 @@ export function mapCanonicalVariantToRecipe(variant: CanonicalVariantRecord): Ca
         type: variant.type,
         resultItemId: variant.resultItemId,
         resultQuantity: Number(variant.resultQuantity ?? 1),
+        resultMaxQuantity: outputRange.resultMaxQuantity,
         procItemId: variant.procItemId,
         procQuantity: variant.procQuantity == null ? null : Number(variant.procQuantity),
+        procMaxQuantity: outputRange.procMaxQuantity,
         masteryBonusPct: Number(variant.masteryBonusPct ?? 0),
         experience: Number(variant.experience ?? 0),
         cookTimeSeconds: Number(variant.cookTimeSeconds ?? 0),
@@ -459,6 +470,7 @@ export async function getCanonicalRecipeDetail(prisma: PrismaClient, recipeId: n
             recipe: normalizeRecipes([rootRecipe])[0],
             ingredientAlternatives,
             treeRecipes,
+            supportItems: [],
         };
     } catch (error) {
         if (isCanonicalUnavailableError(error)) {

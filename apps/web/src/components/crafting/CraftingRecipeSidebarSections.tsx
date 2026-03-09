@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import {
     ChevronDown,
     ChevronRight,
@@ -11,7 +12,7 @@ import {
 } from 'lucide-react';
 import {
     formatRecipeTime,
-    getGradeClass,
+    type IngredientAlternative,
     type PriceBreakdown,
     type RecipeTreeNode,
 } from '@/lib/crafting/calculator';
@@ -33,6 +34,16 @@ export interface TreeNodeViewProps {
     collapsedIds: number[];
     useRareProcIds: number[];
     slowCookedIds: number[];
+    depth?: number;
+}
+
+interface TreeNodeViewInternalProps extends TreeNodeViewProps {
+    materialAlternatives?: IngredientAlternative[];
+    materialParentRecipeId?: number | null;
+    materialSlotIndex?: number;
+    isMaterialSelectorOpen?: boolean;
+    onToggleMaterialSelector?: () => void;
+    onSelectMaterialOption?: (itemId: number) => void;
 }
 
 const PRICE_SOURCE_LABEL: Record<PriceBreakdown['source'], string> = {
@@ -42,23 +53,191 @@ const PRICE_SOURCE_LABEL: Record<PriceBreakdown['source'], string> = {
     missing: 'Sem preço',
 };
 
-function SourcePill({ source }: { source: PriceBreakdown['source'] }) {
-    const tone = source === 'market'
-        ? 'border-info/30 bg-info/10 text-info'
-        : source === 'custom'
-            ? 'border-gold/30 bg-gold/10 text-gold'
-            : source === 'vendor'
-                ? 'border-profit/30 bg-profit/10 text-profit'
-                : 'border-loss/30 bg-loss/10 text-loss';
+function formatCompactValue(value: number, divisor: number, suffix: string) {
+    const scaled = value / divisor;
+    const digits = scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2;
+    const formatted = scaled.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digits,
+    }).replace(/\.0+$/, '');
 
+    return `${formatted}${suffix}`;
+}
+
+function formatCompactSilver(value: number) {
+    const absValue = Math.abs(value);
+    const prefix = value < 0 ? '-' : '';
+
+    if (absValue >= 1_000_000_000) {
+        return `${prefix}${formatCompactValue(absValue, 1_000_000_000, 'B')}`;
+    }
+
+    if (absValue >= 1_000_000) {
+        return `${prefix}${formatCompactValue(absValue, 1_000_000, 'M')}`;
+    }
+
+    if (absValue >= 1_000) {
+        return `${prefix}${formatCompactValue(absValue, 1_000, 'K')}`;
+    }
+
+    return `${prefix}${Math.round(absValue).toLocaleString('pt-BR')}`;
+}
+
+function formatCompactProfitPerHour(value: number) {
+    return `${formatCompactSilver(value)}/h`;
+}
+
+function formatQuantity(value: number) {
+    return value.toLocaleString('pt-BR', {
+        minimumFractionDigits: Number.isInteger(value) ? 0 : 1,
+        maximumFractionDigits: 1,
+    });
+}
+
+function getTreeDepthStyle(depth: number): CSSProperties {
+    const mobileDepth = depth <= 2 ? depth : 2 + (depth - 2) * 0.4;
+
+    return {
+        '--recipe-tree-depth-desktop': String(depth),
+        '--recipe-tree-depth-mobile': mobileDepth.toFixed(2),
+    } as CSSProperties;
+}
+
+function getRecipeAccentClass(node: Extract<RecipeTreeNode, { type: 'recipe' }>) {
+    if (node.craftingType === 'alchemy') {
+        return 'recipe-tree-row-alchemy';
+    }
+
+    if (node.craftingType === 'processing') {
+        return 'recipe-tree-row-processing';
+    }
+
+    return 'recipe-tree-row-cooking';
+}
+
+function getLevelBadgeClass(node: RecipeTreeNode) {
+    if (node.type === 'material') {
+        return 'recipe-tree-level recipe-tree-level-material';
+    }
+
+    if (node.craftingType === 'alchemy') {
+        return 'recipe-tree-level recipe-tree-level-alchemy';
+    }
+
+    if (node.craftingType === 'processing') {
+        return 'recipe-tree-level recipe-tree-level-processing';
+    }
+
+    return 'recipe-tree-level recipe-tree-level-cooking';
+}
+
+function getSourceChipClass(source: PriceBreakdown['source']) {
+    if (source === 'market') {
+        return 'recipe-tree-chip recipe-tree-source-chip recipe-tree-chip-info';
+    }
+
+    if (source === 'vendor') {
+        return 'recipe-tree-chip recipe-tree-source-chip recipe-tree-chip-profit';
+    }
+
+    if (source === 'custom') {
+        return 'recipe-tree-chip recipe-tree-source-chip recipe-tree-chip-gold';
+    }
+
+    return 'recipe-tree-chip recipe-tree-source-chip recipe-tree-chip-loss';
+}
+
+function getNodeIcon(node: RecipeTreeNode) {
+    const iconUrl = resolveBdoIconUrl(node.iconUrl ?? node.outputs[0]?.iconUrl ?? null);
+
+    if (iconUrl) {
+        return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={iconUrl} alt={node.name} className="recipe-tree-icon-image" />
+        );
+    }
+
+    const FallbackIcon = node.type === 'material'
+        ? Package2
+        : node.craftingType === 'alchemy'
+            ? FlaskConical
+            : node.craftingType === 'processing'
+                ? Package2
+                : ChefHat;
+
+    return <FallbackIcon size={18} className="text-secondary" />;
+}
+
+function NodeToggle({
+    label,
+    checked,
+    onChange,
+}: {
+    label: string;
+    checked: boolean;
+    onChange: () => void;
+}) {
     return (
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${tone}`}>
-            {PRICE_SOURCE_LABEL[source]}
-        </span>
+        <button
+            type="button"
+            onClick={onChange}
+            aria-pressed={checked}
+            className={`recipe-tree-control ${checked ? 'recipe-tree-control-active' : ''}`}
+        >
+            <span className={`recipe-tree-control-indicator ${checked ? 'recipe-tree-control-indicator-active' : ''}`} />
+            {label}
+        </button>
     );
 }
 
-export function TreeNodeView({
+function AlternativeMaterialSelector({
+    alternatives,
+    currentItemId,
+    open,
+    onToggle,
+    onSelect,
+}: {
+    alternatives: IngredientAlternative[];
+    currentItemId: number;
+    open: boolean;
+    onToggle: () => void;
+    onSelect: (itemId: number) => void;
+}) {
+    const selectedAlternative = alternatives.find((alternative) => alternative.itemId === currentItemId) ?? alternatives[0];
+
+    return (
+        <>
+            <button type="button" onClick={onToggle} className="recipe-tree-inline-action">
+                {open ? 'Fechar troca' : 'Trocar material'}
+            </button>
+            <span className="recipe-tree-inline-note">Atual: {selectedAlternative.item.name}</span>
+
+            {open ? (
+                <div className="recipe-tree-selector">
+                    <label className="recipe-tree-selector-label">
+                        Material do slot
+                        <select
+                            value={currentItemId}
+                            onChange={(event) => onSelect(Number(event.target.value))}
+                            className="recipe-tree-selector-input"
+                        >
+                            {alternatives.map((alternative) => (
+                                <option key={alternative.itemId} value={alternative.itemId}>
+                                    {alternative.quantity}x {alternative.item.name}
+                                    {alternative.subRecipeId
+                                        ? ` · sub-receita ${alternative.subRecipeType}`
+                                        : ' · compra direta'}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                </div>
+            ) : null}
+        </>
+    );
+}
+
+function TreeNodeViewInternal({
     node,
     onToggleCollapse,
     onToggleRareProc,
@@ -67,204 +246,245 @@ export function TreeNodeView({
     collapsedIds,
     useRareProcIds,
     slowCookedIds,
-}: TreeNodeViewProps) {
+    depth = 0,
+    materialAlternatives = [],
+    materialParentRecipeId = null,
+    materialSlotIndex,
+    isMaterialSelectorOpen = false,
+    onToggleMaterialSelector,
+    onSelectMaterialOption,
+}: TreeNodeViewInternalProps) {
+    const [openMaterialSlot, setOpenMaterialSlot] = useState<number | null>(null);
+    const hasMaterialAlternatives = materialAlternatives.length > 1
+        && materialParentRecipeId !== null
+        && materialSlotIndex !== undefined
+        && Boolean(onToggleMaterialSelector)
+        && Boolean(onSelectMaterialOption);
+
+    const renderChildNodes = (childDepth: number): ReactNode => {
+        if (node.type !== 'recipe') {
+            return null;
+        }
+
+        return node.children.map((child, index) => {
+            const alternatives = node.ingredientAlternatives[index] ?? [];
+
+            return (
+                <TreeNodeViewInternal
+                    key={child.key}
+                    node={child}
+                    onToggleCollapse={onToggleCollapse}
+                    onToggleRareProc={onToggleRareProc}
+                    onToggleSlowCook={onToggleSlowCook}
+                    onSelectMaterial={onSelectMaterial}
+                    collapsedIds={collapsedIds}
+                    useRareProcIds={useRareProcIds}
+                    slowCookedIds={slowCookedIds}
+                    depth={childDepth}
+                    materialAlternatives={alternatives}
+                    materialParentRecipeId={node.recipeId}
+                    materialSlotIndex={index}
+                    isMaterialSelectorOpen={openMaterialSlot === index}
+                    onToggleMaterialSelector={() => {
+                        setOpenMaterialSlot((current) => current === index ? null : index);
+                    }}
+                    onSelectMaterialOption={(itemId) => {
+                        if (node.recipeId === null) {
+                            return;
+                        }
+
+                        onSelectMaterial(node.recipeId, index, itemId);
+                        setOpenMaterialSlot(null);
+                    }}
+                />
+            );
+        });
+    };
+
     if (node.type === 'material') {
-        const iconUrl = resolveBdoIconUrl(node.iconUrl);
-
         return (
-            <div className="rounded-xl border border-border bg-bg-hover/20 px-3 py-3">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-start gap-3">
-                        {iconUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={iconUrl} alt={node.name} className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
-                        ) : (
-                            <div className="h-9 w-9 rounded-lg border border-border bg-bg-primary" />
-                        )}
+            <li className="recipe-tree-item" data-depth={depth} style={getTreeDepthStyle(depth)}>
+                <article className="recipe-tree-row recipe-tree-row-material">
+                    <div className="recipe-tree-row-main">
+                        <span className="recipe-tree-toggle-spacer" aria-hidden="true" />
+                        <span className={getLevelBadgeClass(node)}>{depth + 1}</span>
 
-                        <div className="min-w-0">
-                            <p className="truncate font-medium text-primary">{node.name}</p>
-                            <div className="mt-1 flex flex-wrap items-center gap-2">
-                                {node.priceSource ? <SourcePill source={node.priceSource} /> : null}
-                                {node.isTradeable === false ? (
-                                    <span className="rounded-full border border-border bg-bg-primary px-2 py-0.5 text-[11px] font-medium text-secondary">
-                                        Não comercializável
-                                    </span>
-                                ) : null}
+                        <div className="recipe-tree-copy">
+                            <div className="recipe-tree-headline">
+                                <p className="recipe-tree-name">{node.name}</p>
+                                <span className="recipe-tree-inline-note">({formatQuantity(node.requestedQuantity)} un.)</span>
                             </div>
-                            <p className="mt-2 text-xs text-secondary">
-                                {node.requestedQuantity.toFixed(2)} un. • Preço un.: {(node.unitPrice ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                            </p>
-                            {node.priceSource === 'missing' ? (
-                                <p className="mt-1 text-xs text-loss">Sem preço conhecido. Ajuste manualmente se necessário.</p>
-                            ) : null}
-                            {node.priceSource === 'vendor' ? (
-                                <p className="mt-1 text-xs text-profit">Tratado como compra de vendor/NPC.</p>
-                            ) : null}
+
+                            <div className="recipe-tree-material-meta">
+                                <div className="recipe-tree-origin-column">
+                                    {node.priceSource ? (
+                                        <span className={getSourceChipClass(node.priceSource)}>
+                                            {PRICE_SOURCE_LABEL[node.priceSource]}
+                                        </span>
+                                    ) : null}
+                                    {node.isTradeable === false ? (
+                                        <span className="recipe-tree-chip recipe-tree-origin-note recipe-tree-chip-neutral">
+                                            Não comercializável
+                                        </span>
+                                    ) : null}
+                                </div>
+
+                                <div className="recipe-tree-material-facts">
+                                    <span className="recipe-tree-inline-note recipe-tree-price-note">
+                                        Preço un.: {(node.unitPrice ?? 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                                    </span>
+                                    {hasMaterialAlternatives ? (
+                                        <AlternativeMaterialSelector
+                                            alternatives={materialAlternatives}
+                                            currentItemId={node.itemId}
+                                            open={isMaterialSelectorOpen}
+                                            onToggle={onToggleMaterialSelector!}
+                                            onSelect={onSelectMaterialOption!}
+                                        />
+                                    ) : null}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="recipe-tree-side">
+                            <div className="recipe-tree-value-group">
+                                <span className="recipe-tree-value-label">Custo</span>
+                                <span className="recipe-tree-value recipe-tree-value-loss">
+                                    {formatCompactSilver(node.craftingCost)}
+                                </span>
+                            </div>
+                            <div className="recipe-tree-icon">
+                                {getNodeIcon(node)}
+                            </div>
                         </div>
                     </div>
-                    <span className="font-mono text-sm text-loss">
-                        {node.craftingCost.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                    </span>
-                </div>
-            </div>
+                </article>
+            </li>
         );
     }
 
     const isCollapsed = node.recipeId ? collapsedIds.includes(node.recipeId) : false;
     const usesRareProc = node.recipeId ? !useRareProcIds.includes(node.recipeId) : false;
     const usesSlowCook = node.recipeId ? slowCookedIds.includes(node.recipeId) : false;
-    const NodeIcon = node.craftingType === 'alchemy' ? FlaskConical : node.craftingType === 'cooking' ? ChefHat : Package2;
+    const canToggleRareProc = node.recipeId !== null && node.parentRecipeId !== null && node.craftingType !== 'processing';
+    const canToggleSlowCook = node.recipeId !== null && node.parentRecipeId !== null && node.craftingType === 'cooking';
+
+    if (depth < 0) {
+        return <>{renderChildNodes(0)}</>;
+    }
 
     return (
-        <div className="rounded-2xl border border-border bg-bg-hover/20 p-3">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
+        <li className="recipe-tree-item" data-depth={depth} style={getTreeDepthStyle(depth)}>
+            <article className={`recipe-tree-row recipe-tree-row-recipe ${getRecipeAccentClass(node)} ${depth === 0 && node.parentRecipeId === null ? 'recipe-tree-row-root' : ''}`}>
+                <div className="recipe-tree-row-main">
                     <button
                         type="button"
                         onClick={() => node.recipeId && onToggleCollapse(node.recipeId)}
-                        className="mt-0.5 rounded-lg border border-border bg-bg-primary p-1 text-secondary hover:text-primary"
+                        className="recipe-tree-collapse"
+                        aria-label={isCollapsed ? `Expandir ${node.name}` : `Recolher ${node.name}`}
                     >
                         {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
                     </button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <NodeIcon size={16} className={node.craftingType === 'alchemy' ? 'text-info' : 'text-gold'} />
+
+                    <span className={getLevelBadgeClass(node)}>{depth + 1}</span>
+
+                    <div className="recipe-tree-copy">
+                        <div className="recipe-tree-headline">
                             {node.recipeId ? (
-                                <Link href={`/${node.craftingType}/${node.recipeId}`} className="font-semibold text-primary hover:text-gold transition-colors">
+                                <Link href={`/${node.craftingType}/${node.recipeId}`} className="recipe-tree-name-link">
                                     {node.name}
                                 </Link>
                             ) : (
-                                <p className="font-semibold text-primary">{node.name}</p>
+                                <p className="recipe-tree-name">{node.name}</p>
                             )}
-                            <span className={`grade-badge ${getGradeClass(node.outputs[0]?.grade ?? null)}`}>
-                                {node.craftingType}
+                            <span className={`recipe-tree-profit ${node.displayedProfitPerHour >= 0 ? 'recipe-tree-profit-positive' : 'recipe-tree-profit-negative'}`}>
+                                {formatCompactProfitPerHour(node.displayedProfitPerHour)}
                             </span>
                         </div>
-                        <p className="mt-1 text-xs text-secondary">
-                            Crafts: {node.craftQuantity.toFixed(1)} • Saída esperada: {node.normalProcQuantity.toFixed(1)}
-                            {node.rareProcQuantity > 0 ? ` + ${node.rareProcQuantity.toFixed(1)}` : ''}
-                        </p>
+
+                        <div className="recipe-tree-meta">
+                            <span>({formatQuantity(node.craftQuantity)} crafts)</span>
+                            <span>
+                                Saída {formatQuantity(node.normalProcQuantity)}
+                                {node.rareProcQuantity > 0 ? ` + ${formatQuantity(node.rareProcQuantity)}` : ''}
+                            </span>
+                        </div>
+
+                        <div className="recipe-tree-subline">
+                            <span className="recipe-tree-inline-note">Tempo {formatRecipeTime(node.totalTime)}</span>
+                            {canToggleRareProc ? (
+                                <NodeToggle
+                                    label="Usar proc raro"
+                                    checked={usesRareProc}
+                                    onChange={() => onToggleRareProc(node.recipeId!)}
+                                />
+                            ) : null}
+                            {canToggleSlowCook ? (
+                                <NodeToggle
+                                    label="Cozimento lento"
+                                    checked={usesSlowCook}
+                                    onChange={() => onToggleSlowCook(node.recipeId!)}
+                                />
+                            ) : null}
+                            {hasMaterialAlternatives ? (
+                                <AlternativeMaterialSelector
+                                    alternatives={materialAlternatives}
+                                    currentItemId={node.itemId}
+                                    open={isMaterialSelectorOpen}
+                                    onToggle={onToggleMaterialSelector!}
+                                    onSelect={onSelectMaterialOption!}
+                                />
+                            ) : null}
+                        </div>
+                    </div>
+
+                    <div className="recipe-tree-icon">
+                        {getNodeIcon(node)}
                     </div>
                 </div>
+            </article>
 
-                <div className="grid min-w-[220px] grid-cols-2 gap-2 text-right text-xs">
-                    <div>
-                        <p className="text-muted uppercase tracking-wider">Lucro/H</p>
-                        <p className={`font-mono font-semibold ${node.displayedProfitPerHour >= 0 ? 'text-profit' : 'text-loss'}`}>
-                            {node.displayedProfitPerHour.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-muted uppercase tracking-wider">Tempo</p>
-                        <p className="font-mono text-primary">{formatRecipeTime(node.totalTime)}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-3 text-xs text-secondary">
-                {node.recipeId && node.parentRecipeId !== null && node.craftingType !== 'processing' && (
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={usesRareProc}
-                            onChange={() => onToggleRareProc(node.recipeId!)}
-                            className="size-4 accent-[var(--color-gold)]"
-                        />
-                        Usar proc raro
-                    </label>
-                )}
-
-                {node.recipeId && node.parentRecipeId !== null && node.craftingType === 'cooking' && (
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={usesSlowCook}
-                            onChange={() => onToggleSlowCook(node.recipeId!)}
-                            className="size-4 accent-[var(--color-gold)]"
-                        />
-                        Cozimento lento
-                    </label>
-                )}
-            </div>
-
-            {!isCollapsed && (
-                <div className="mt-4 space-y-3">
-                    {Object.entries(node.ingredientAlternatives).map(([slotKey, alternatives], index) => {
-                        if (alternatives.length <= 1 || !node.recipeId) {
-                            return null;
-                        }
-
-                        const child = node.children[index];
-                        const selectedAlternative = alternatives.find((alternative) => alternative.itemId === child?.itemId) ?? alternatives[0];
-                        return (
-                            <label key={`${node.recipeId}-${slotKey}`} className="flex flex-col gap-1 text-xs text-secondary">
-                                Escolha do material
-                                <select
-                                    value={child?.itemId ?? alternatives[0].itemId}
-                                    onChange={(event) => onSelectMaterial(node.recipeId!, Number(slotKey), Number(event.target.value))}
-                                    className="rounded-lg border border-border bg-bg-primary px-3 py-2 text-sm text-primary focus:outline-none focus:border-gold"
-                                >
-                                    {alternatives.map((alternative) => (
-                                        <option key={alternative.itemId} value={alternative.itemId}>
-                                            {alternative.quantity}x {alternative.item.name} · {alternative.subRecipeId ? `sub-receita ${alternative.subRecipeType}` : 'compra direta'}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span>
-                                    Alternativas inferidas das variantes cadastradas desta receita. Seleção atual:{' '}
-                                    <span className="font-medium text-primary">{selectedAlternative.item.name}</span>
-                                    {selectedAlternative.subRecipeId
-                                        ? ` com sub-receita ${selectedAlternative.subRecipeType}`
-                                        : ' sem sub-receita conhecida'}.
-                                </span>
-                            </label>
-                        );
-                    })}
-
-                    <div className="space-y-2 border-l border-border pl-4">
-                        {node.children.map((child) => (
-                            <TreeNodeView
-                                key={child.key}
-                                node={child}
-                                onToggleCollapse={onToggleCollapse}
-                                onToggleRareProc={onToggleRareProc}
-                                onToggleSlowCook={onToggleSlowCook}
-                                onSelectMaterial={onSelectMaterial}
-                                collapsedIds={collapsedIds}
-                                useRareProcIds={useRareProcIds}
-                                slowCookedIds={slowCookedIds}
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+            {!isCollapsed && node.children.length > 0 ? (
+                <ol className="recipe-tree-list recipe-tree-children">
+                    {renderChildNodes(depth + 1)}
+                </ol>
+            ) : null}
+        </li>
     );
+}
+
+export function TreeNodeView(props: TreeNodeViewProps) {
+    return <TreeNodeViewInternal {...props} />;
 }
 
 export function SettingsPanel({ type }: { type: 'cooking' | 'alchemy' }) {
     const settings = useGlobalSettings();
 
     return (
-        <div className="space-y-4 rounded-2xl border border-border bg-bg-hover/10 p-4">
-            <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
-                    <Settings2 size={16} className="text-gold" />
-                    Configurações
-                </h3>
-                <Link href="/settings" className="text-xs text-gold hover:underline">
+        <section className="overflow-hidden rounded-3xl border border-border bg-bg-hover/10 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-4 border-b border-border/80 px-5 py-5">
+                <div>
+                    <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
+                        <Settings2 size={16} className="text-gold" />
+                        Configurações da calculadora
+                    </h3>
+                    <p className="mt-2 text-xs leading-5 text-secondary">
+                        Ajustes globais aplicados ao cálculo de mercado, maestria e inventário.
+                    </p>
+                </div>
+
+                <Link href="/settings" className="text-xs font-medium text-gold transition-colors hover:text-gold-light">
                     Abrir página completa
                 </Link>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-4 p-5">
                 <GlobalSettingsMarketSection settings={settings} compact />
                 {type === 'cooking'
                     ? <GlobalSettingsCookingSection settings={settings} compact />
                     : <GlobalSettingsAlchemySection settings={settings} compact />}
                 <GlobalSettingsInventorySection settings={settings} compact />
             </div>
-        </div>
+        </section>
     );
 }

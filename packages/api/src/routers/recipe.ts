@@ -13,6 +13,7 @@ import {
     isCanonicalRecipesUnavailableError,
     listCanonicalRecipes,
 } from '../services/canonical-recipe-reader';
+import { listCraftingSupportItems } from '../services/crafting-support-items';
 import type { RankingWeights } from '../types';
 
 const taxConfigSchema = z.object({
@@ -65,7 +66,18 @@ export const recipeRouter = router({
             types: z.array(z.enum(['cooking', 'alchemy', 'processing'])).min(1).optional(),
             historyDays: z.number().int().min(1).max(60).default(28),
         }))
-        .query(({ ctx, input }) => withCanonicalRead(() => catalogCanonicalRecipes(ctx.prisma, input))),
+        .query(({ ctx, input }) => withCanonicalRead(async () => {
+            const recipes = await catalogCanonicalRecipes(ctx.prisma, input);
+            const supportItems = await listCraftingSupportItems(
+                ctx.prisma,
+                (input.types ?? ['cooking', 'alchemy', 'processing']),
+            );
+
+            return {
+                recipes,
+                supportItems,
+            };
+        })),
 
     /** Detalhes de uma receita por ID */
     getById: publicProcedure
@@ -76,10 +88,16 @@ export const recipeRouter = router({
                 return null;
             }
 
+            const supportItems = await listCraftingSupportItems(
+                ctx.prisma,
+                Array.from(new Set(canonicalDetail.treeRecipes.map((recipe) => recipe.type as 'cooking' | 'alchemy' | 'processing'))),
+            );
+
             return {
                 ...canonicalDetail.recipe,
                 ingredientAlternatives: canonicalDetail.ingredientAlternatives,
                 treeRecipes: canonicalDetail.treeRecipes,
+                supportItems,
             };
         })),
 
