@@ -782,8 +782,16 @@ body {
 /* Main content */
 .main-content {
   margin-left: 260px;
+  width: calc(100vw - 260px);
+  max-width: calc(100vw - 260px);
   min-height: 100vh;
-  padding: 24px 32px;
+  padding: 20px 24px 24px;
+  overflow-x: hidden;
+}
+
+.main-content > * {
+  width: 100%;
+  min-width: 0;
 }
 
 /* Responsivo */
@@ -799,6 +807,8 @@ body {
 
   .main-content {
     margin-left: 0;
-    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    padding: 16px 14px 20px;
   }
 }

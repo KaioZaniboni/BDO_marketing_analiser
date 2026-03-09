@@ -76,8 +76,8 @@ export function CraftingRecipeSidebarPanel({
     const expectedOutput = tree.normalProcQuantity + tree.rareProcQuantity;
 
     return (
-        <aside className="space-y-5 xl:sticky xl:top-6">
-            <section className="overflow-hidden rounded-3xl border border-border bg-bg-hover/10 shadow-[var(--shadow-card)]">
+        <aside className="w-full min-w-0 space-y-5 xl:sticky xl:top-6">
+            <section className="w-full min-w-0 overflow-hidden rounded-3xl border border-border bg-bg-hover/10 shadow-[var(--shadow-card)]">
                 <div className="border-b border-border/80 px-5 py-5">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-muted">Resumo do lote</p>
                     <h2 className="mt-2.5 text-base font-semibold text-primary">Indicadores principais</h2>

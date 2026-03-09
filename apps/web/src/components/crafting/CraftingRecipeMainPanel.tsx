@@ -20,10 +20,10 @@ export function CraftingRecipeMainPanel({
     summaryClassName,
 }: CraftingRecipeMainPanelProps) {
     return (
-        <div className="card min-w-0 overflow-hidden">
+        <div className="card w-full min-w-0 overflow-hidden">
             <DetailTabsHeader activeTab={activeTab} onChange={onActiveTabChange} />
 
-            <div className="p-4">
+            <div className="min-w-0 p-4">
                 <DetailTabContent activeTab={activeTab} {...detailContentProps} />
             </div>
 

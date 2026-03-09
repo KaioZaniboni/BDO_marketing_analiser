@@ -192,7 +192,7 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
     const resultPriceBreakdown = getItemPriceBreakdown(recipe.resultItem, calculatorState);
 
     return (
-        <div className="flex flex-col gap-6 pb-24">
+        <div className="flex w-full min-w-0 flex-col gap-6 pb-24">
             <CraftingRecipeHeader
                 recipeName={recipe.name}
                 recipeType={recipe.type}
@@ -210,7 +210,7 @@ export function CraftingRecipePage({ recipeId }: CraftingRecipePageProps) {
                 onToggleShowSettings={() => setShowSettings((current) => !current)}
             />
 
-            <div className="grid gap-6 xl:items-start xl:grid-cols-[minmax(0,0.86fr)_minmax(440px,560px)] 2xl:grid-cols-[minmax(0,0.82fr)_minmax(500px,620px)]">
+            <div className="grid w-full min-w-0 gap-6 xl:items-start xl:grid-cols-[minmax(0,1fr)_clamp(420px,34vw,560px)] 2xl:grid-cols-[minmax(0,1fr)_clamp(460px,36vw,640px)]">
                 <CraftingRecipeMainPanel
                     activeTab={activeTab}
                     onActiveTabChange={setActiveTab}

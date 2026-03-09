@@ -9,6 +9,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     return (
         <AnimatePresence mode="wait">
             <motion.div
+                className="w-full min-w-0"
                 key={pathname}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}

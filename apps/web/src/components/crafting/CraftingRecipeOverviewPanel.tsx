@@ -23,8 +23,8 @@ function InputTable({
     onSetCustomPrice: (itemId: number, value: number | null) => void;
 }) {
     return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full text-sm xl:table-fixed">
+        <div className="w-full min-w-0 overflow-x-auto">
+            <table className="w-full min-w-full text-sm xl:table-fixed">
                 <colgroup>
                     <col />
                     <col style={{ width: '6rem' }} />
@@ -120,8 +120,16 @@ function OutputTable({
     onSetCustomPrice: (itemId: number, value: number | null) => void;
 }) {
     return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
+        <div className="w-full min-w-0 overflow-x-auto">
+            <table className="w-full min-w-full text-sm xl:table-fixed">
+                <colgroup>
+                    <col />
+                    <col style={{ width: '6rem' }} />
+                    <col style={{ width: '9rem' }} />
+                    <col style={{ width: '8.5rem' }} />
+                    <col style={{ width: '5.5rem' }} />
+                    <col style={{ width: '8rem' }} />
+                </colgroup>
                 <thead className="text-xs uppercase text-secondary">
                     <tr>
                         <th className="px-4 py-4 text-left">Saída</th>
@@ -205,8 +213,8 @@ export function OverviewPanel({
     onSetCustomPrice: (itemId: number, value: number | null) => void;
 }) {
     return (
-        <div className="space-y-7">
-            <div className="rounded-2xl border border-border bg-bg-hover/10 p-5">
+        <div className="w-full min-w-0 space-y-7">
+            <div className="w-full min-w-0 rounded-2xl border border-border bg-bg-hover/10 p-5">
                 <p className="text-sm font-semibold text-primary">Visão principal do lote</p>
                 <p className="mt-2 text-xs leading-5 text-secondary">
                     Entradas e saídas calculadas para a quantidade atual. A origem do preço é exibida de forma explícita
@@ -214,7 +222,7 @@ export function OverviewPanel({
                 </p>
             </div>
 
-            <div className="rounded-2xl border border-border bg-bg-hover/10 p-5">
+            <div className="w-full min-w-0 rounded-2xl border border-border bg-bg-hover/10 p-5">
                 <SectionHeader
                     title="Entradas"
                     description="Materiais base necessários após resolver sub-receitas e materiais selecionados na árvore."
@@ -227,7 +235,7 @@ export function OverviewPanel({
                 />
             </div>
 
-            <div className="rounded-2xl border border-border bg-bg-hover/10 p-5">
+            <div className="w-full min-w-0 rounded-2xl border border-border bg-bg-hover/10 p-5">
                 <SectionHeader
                     title="Saídas"
                     description="Resultado principal, proc raro e subproduto, respeitando itens mantidos e preços configurados."
