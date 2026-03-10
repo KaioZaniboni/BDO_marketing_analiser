@@ -21,6 +21,15 @@ export type AppRouter = typeof appRouter;
 export { type Context, type SessionContextUser } from './trpc';
 export { router, publicProcedure, protectedProcedure, adminProcedure, isAdminSession } from './trpc';
 export type {
+    ImperialBestAcquisition,
+    ImperialBestSaleChannel,
+    ImperialIngredientPerBox,
+    ImperialInventoryCoverageRow,
+    ImperialRankingRow,
+    ImperialRecipeMappingEntry,
+    ImperialTier,
+    ImperialTierKey,
+    ImperialType,
     TaxConfig,
     InventoryMatch,
     ProfitAnalysis,
@@ -34,3 +43,4 @@ export {
     analyzeProfitability,
     rankRecipes,
 } from './services/calculator';
+export { getImperialBonus, IMPERIAL_RECIPE_ENTRIES, IMPERIAL_RECIPES_MAPPING, IMPERIAL_TIERS } from './services/imperial-data';

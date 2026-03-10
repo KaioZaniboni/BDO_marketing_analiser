@@ -41,6 +41,7 @@ model Item {
   canonicalVariantsProc     CraftingRecipeVariant[]   @relation("CraftingRecipeVariantProc")
   canonicalSlotOptions      CraftingRecipeSlotOption[]
   inventoryEntries UserInventory[]
+  inventoryOcrImportItems InventoryOcrImportItem[]
 
   @@map("items")
 }
@@ -310,6 +311,7 @@ model User {
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
 
   inventory             UserInventory[]
+  inventoryOcrImports   InventoryOcrImportBatch[]
   recipeCurationsUpdated RecipeCuration[]     @relation("RecipeCurationUpdatedBy")
   recipeCurationAudits   RecipeCurationAudit[] @relation("RecipeCurationAuditActor")
 
@@ -333,6 +335,43 @@ model UserInventory {
   @@unique([userId, itemId])
   @@index([userId])
   @@map("user_inventory")
+}
+
+// ========================================
+// Histórico de importação OCR do inventário
+// ========================================
+model InventoryOcrImportBatch {
+  id                   Int      @id @default(autoincrement())
+  userId               Int      @map("user_id")
+  ocrTexts             Json     @map("ocr_texts")
+  importedRowCount     Int      @default(0) @map("imported_row_count")
+  importedQuantityTotal Int     @default(0) @map("imported_quantity_total")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  user          User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  importedItems InventoryOcrImportItem[]
+
+  @@index([userId, createdAt])
+  @@map("inventory_ocr_import_batches")
+}
+
+model InventoryOcrImportItem {
+  id                Int      @id @default(autoincrement())
+  batchId           Int      @map("batch_id")
+  selectedItemId    Int      @map("selected_item_id")
+  rawName           String   @map("raw_name") @db.VarChar(120)
+  originalQuantity  Int      @map("original_quantity")
+  confirmedQuantity Int      @map("confirmed_quantity")
+  score             Float
+  selectionSource   String   @map("selection_source") @db.VarChar(16)
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  batch        InventoryOcrImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  selectedItem Item                    @relation(fields: [selectedItemId], references: [id])
+
+  @@index([batchId])
+  @@index([selectedItemId])
+  @@map("inventory_ocr_import_items")
 }
 
 // ========================================

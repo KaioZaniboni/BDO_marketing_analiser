@@ -323,7 +323,12 @@ export async function catalogCanonicalRecipes(
                     priceHistory: { where: { enhancementLevel: 0 }, take: input.historyDays, orderBy: { recordedDate: 'desc' } },
                 },
             },
-            procItem: { include: { prices: { where: { enhancementLevel: 0 }, take: 1 } } },
+            procItem: {
+                include: {
+                    prices: { where: { enhancementLevel: 0 }, take: 1 },
+                    priceHistory: { where: { enhancementLevel: 0 }, take: input.historyDays, orderBy: { recordedDate: 'desc' } },
+                },
+            },
             slotSelections: {
                 include: {
                     slot: true,

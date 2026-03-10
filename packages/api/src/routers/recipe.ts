@@ -4,6 +4,7 @@ import { router, publicProcedure, protectedProcedure } from '../trpc';
 import { calculateNetMultiplier } from '../services/calculator';
 import {
     analyzeCanonicalRecipeProfitability,
+    buildCanonicalImperialInventoryCoverage,
     buildCanonicalImperialRanking,
     buildCanonicalRanking,
 } from '../services/canonical-recipe-analytics';
@@ -32,6 +33,8 @@ const rankingWeightsSchema = z.object({
 const imperialListSchema = z.object({
     type: z.enum(['cooking', 'alchemy']).optional(),
     mastery: z.number().min(0).max(2000).default(0),
+    cookingTimeSeconds: z.number().min(0.1).max(60).optional(),
+    alchemyTimeSeconds: z.number().min(0.1).max(60).optional(),
     taxConfig: taxConfigSchema.optional(),
 });
 
@@ -110,6 +113,28 @@ export const recipeRouter = router({
                 historyDays: 1,
             });
             return buildCanonicalImperialRanking(recipes, input);
+        })),
+
+    /** Cobertura de caixas imperiais com o inventario atual do usuario */
+    getImperialInventoryCoverage: protectedProcedure
+        .input(imperialListSchema)
+        .query(({ ctx, input }) => withCanonicalRead(async () => {
+            const [recipes, inventory] = await Promise.all([
+                catalogCanonicalRecipes(ctx.prisma, {
+                    types: input.type ? [input.type] : ['cooking', 'alchemy'],
+                    historyDays: 1,
+                }),
+                ctx.prisma.userInventory.findMany({
+                    where: { userId: ctx.session.userId },
+                }),
+            ]);
+
+            const ranking = buildCanonicalImperialRanking(recipes, input);
+            const userInventory = new Map<number, number>(
+                inventory.map((item) => [item.itemId, item.quantity] as const),
+            );
+
+            return buildCanonicalImperialInventoryCoverage(ranking, userInventory);
         })),
 
     /** Calcula taxa líquida do mercado */
